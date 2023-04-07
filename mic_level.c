@@ -145,7 +145,7 @@ void update_mic_level(RADIO *r) {
     cairo_stroke(cr);
 
     SetColour(cr, TEXT_B);    
-    cairo_select_font_face(cr, "Times New Roman", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);    
+    cairo_select_font_face(cr, "Andale Mono", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);    
     cairo_set_font_size(cr,10);
     cairo_text_extents(cr, title, &extents);
     cairo_move_to(cr,(5+width/2)-(extents.width/2.0),height-2);

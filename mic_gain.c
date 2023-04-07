@@ -63,7 +63,7 @@ static gboolean mic_gain_draw_cb(GtkWidget *widget,cairo_t *cr,gpointer data) {
   cairo_stroke(cr);  
   
   SetColour(cr, TEXT_B);
-  cairo_select_font_face(cr, "Times New Roman", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);  
+  cairo_select_font_face(cr, "Andale Mono", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);  
   cairo_set_font_size(cr,10);
   cairo_text_extents(cr, title, &extents);
   sprintf(t,"%s (%ddB)",title,(int)radio->transmitter->mic_gain);

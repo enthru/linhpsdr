@@ -1389,7 +1389,7 @@ static gboolean frequency_a_press_cb(GtkWidget *widget,GdkEvent *event,gpointer 
 
 	for(j=0;j<bandstack->entries;j++) {
           entry=&bandstack->entry[j];
-	  sprintf(temp,"%5lld.%03lld.%03lld",entry->frequency/(long long)1000000,(entry->frequency%(long long)1000000)/(long long)1000,entry->frequency%(long long)1000);
+	  sprintf(temp,"%05lld.%03lld.%03lld",entry->frequency/(long long)1000000,(entry->frequency%(long long)1000000)/(long long)1000,entry->frequency%(long long)1000);
           menu_item=gtk_menu_item_new_with_label(temp);
           choice=g_new0(CHOICE,1);
           choice->rx=rx;
@@ -1629,7 +1629,7 @@ GtkWidget *create_vfo(RECEIVER *rx) {
   if(rx->ctun) af=rx->ctun_frequency;
   if(rx->entering_frequency) af=rx->entered_frequency;
     
-  sprintf(temp,"%5lld.%03lld.%03lld",af/(long long)1000000,(af%(long long)1000000)/(long long)1000,af%(long long)1000);
+  sprintf(temp,"%05lld.%03lld.%03lld",af/(long long)1000000,(af%(long long)1000000)/(long long)1000,af%(long long)1000);
   v->frequency_a_text=gtk_label_new(temp);
   rx->vfo_a_digits=strlen(temp);
   gtk_widget_set_name(v->frequency_a_text,"frequency-a-text");
@@ -1647,7 +1647,7 @@ GtkWidget *create_vfo(RECEIVER *rx) {
   y=27;
 
   long long bf=rx->frequency_b;
-  sprintf(temp,"%5lld.%03lld.%03lld",bf/(long long)1000000,(bf%(long long)1000000)/(long long)1000,bf%(long long)1000);
+  sprintf(temp,"%05lld.%03lld.%03lld",bf/(long long)1000000,(bf%(long long)1000000)/(long long)1000,bf%(long long)1000);
   v->frequency_b_text=gtk_label_new(temp);
   rx->vfo_b_digits=strlen(temp);
   gtk_widget_set_name(v->frequency_b_text,"frequency-b-text");
@@ -1988,7 +1988,7 @@ void update_vfo(RECEIVER *rx) {
   if(rx->ctun) af=rx->ctun_frequency;
   if(rx->entering_frequency) af=rx->entered_frequency;
 
-  sprintf(temp,"%5lld.%03lld.%03lld",af/(long long)1000000,(af%(long long)1000000)/(long long)1000,af%(long long)1000);
+  sprintf(temp,"%05lld.%03lld.%03lld",af/(long long)1000000,(af%(long long)1000000)/(long long)1000,af%(long long)1000);
   if(radio!=NULL && radio->transmitter!=NULL && rx==radio->transmitter->rx && radio->transmitter->rx->split==SPLIT_OFF && isTransmitting(radio)) {
     markup=g_markup_printf_escaped("<span foreground=\"#D94545\">%s</span>",temp);
   } else {
@@ -2005,7 +2005,7 @@ void update_vfo(RECEIVER *rx) {
   gtk_label_set_markup(GTK_LABEL(v->vfo_b_text),markup);
 
   long long bf=rx->frequency_b;
-  sprintf(temp,"%5lld.%03lld.%03lld",bf/(long long)1000000,(bf%(long long)1000000)/(long long)1000,bf%(long long)1000);
+  sprintf(temp,"%05lld.%03lld.%03lld",bf/(long long)1000000,(bf%(long long)1000000)/(long long)1000,bf%(long long)1000);
   if(radio!=NULL && radio->transmitter!=NULL && rx==radio->transmitter->rx && radio->transmitter->rx->split!=SPLIT_OFF && isTransmitting(radio)) {
     markup=g_markup_printf_escaped("<span foreground=\"#D94545\">%s</span>",temp);
   } else {
