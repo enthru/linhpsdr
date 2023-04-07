@@ -19,6 +19,7 @@
 */
 
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -944,6 +945,33 @@ void receiver_move_to(RECEIVER *rx,long long hz) {
   }
 }
 
+gboolean receiver_key_press_event(GtkWidget *widget, GdkEventKey *event, gpointer data) {
+  RECEIVER *rx=(RECEIVER *)data;
+  g_print("Pressed: ");
+  g_print(gdk_keyval_name(event->keyval));
+  g_print("\n");
+  switch(event->keyval) {
+    case GDK_KEY_space:
+        set_mox(radio,TRUE);
+      break;
+  }
+  return TRUE;
+}
+
+gboolean receiver_key_release_event(GtkWidget *widget, GdkEventKey *event, gpointer data) {
+  RECEIVER *rx=(RECEIVER *)data;
+  g_print("Released:");
+  g_print(gdk_keyval_name(event->keyval));
+  g_print("\n");
+  switch(event->keyval) {
+    case GDK_KEY_space:
+      g_print("test");
+      set_mox(radio,FALSE);
+      break;
+  }
+  return TRUE;
+}
+
 gboolean receiver_button_release_event_cb(GtkWidget *widget, GdkEventButton *event, gpointer data) {
   gint64 hz;
   RECEIVER *rx=(RECEIVER *)data;
@@ -1007,7 +1035,9 @@ gboolean receiver_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *even
       //receiver_move(rx,(long long)((double)(moved*rx->hz_per_pixel)),FALSE);
       receiver_move(rx,(long long)((double)(moved*rx->hz_per_pixel)),TRUE);
       rx->last_x=x;
-      rx->has_moved=TRUE;
+      if (moved > 1 || moved < -1) {
+        rx->has_moved=TRUE;
+      }
     } else {
       if(event->x>4 && event->x<35) {
         gdk_window_set_cursor(gtk_widget_get_window(widget),gdk_cursor_new(GDK_DOUBLE_ARROW));
@@ -1493,6 +1523,8 @@ static void create_visual(RECEIVER *rx) {
   g_signal_connect(rx->window,"configure-event",G_CALLBACK(receiver_configure_event_cb),rx);
   g_signal_connect(rx->window,"focus_in_event",G_CALLBACK(focus_in_event_cb),rx);
   g_signal_connect(rx->window,"delete-event",G_CALLBACK (window_delete), rx);
+  g_signal_connect(rx->window,"key-press-event",G_CALLBACK(receiver_key_press_event),rx);
+  g_signal_connect(rx->window,"key-release-event",G_CALLBACK(receiver_key_release_event),rx);
 
   receiver_update_title(rx);
 

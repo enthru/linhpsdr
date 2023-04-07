@@ -1171,7 +1171,9 @@ static gboolean afgain_scale_motion_notify_event_cb(GtkWidget *widget, GdkEventM
   RECEIVER *rx=(RECEIVER *)data;
   if(pressed) {
     gdouble moved=event->x-last_x;
-    has_moved=TRUE;
+    if (moved > 1 && moved < -1) {
+      has_moved=TRUE;
+    }
     rx->volume=rx->volume+(moved/100.0);
     if(rx->volume>1.0) rx->volume=1.0;
     if(rx->volume<0.0) rx->volume=0.0;
@@ -1230,8 +1232,10 @@ static gboolean agcgain_press_cb(GtkWidget *widget,GdkEventButton *event,gpointe
 static gboolean agcgain_scale_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
   RECEIVER *rx=(RECEIVER *)data;
   if(pressed) {
-    has_moved=TRUE;
     gdouble moved=event->x-last_x;
+    if (moved > 1 && moved < -1) {
+      has_moved=TRUE;
+    }
     rx->agc_gain=rx->agc_gain+moved;
     if(rx->agc_gain>120.0) rx->agc_gain=120.0;
     if(rx->agc_gain<-20.0) rx->agc_gain=-20.0;
@@ -1292,8 +1296,10 @@ static gboolean squelch_press_cb(GtkWidget *widget,GdkEventButton *event,gpointe
 static gboolean squelch_scale_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
   RECEIVER *rx=(RECEIVER *)data;
   if(pressed) {
-    has_moved=TRUE;
     gdouble moved=event->x-last_x;
+    if (moved > 1 && moved < -1) {
+      has_moved=TRUE;
+    }
     rx->squelch = rx->squelch + (moved/100.0);
     if(rx->squelch > 1.0) rx->squelch= 1.0;
     if(rx->squelch < 0) rx->squelch = 0;

@@ -363,7 +363,7 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
     //clear_panadater_surface();
     cairo_t *cr;
     cr = cairo_create (rx->panadapter_surface);
-    cairo_select_font_face(cr, "Noto Sans", CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_select_font_face(cr, "Times New Roman", CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size(cr, 12);
     cairo_set_line_width(cr, LINE_WIDTH);
 
@@ -550,7 +550,7 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
           cairo_line_to(cr,(double)x,(double)display_height-20);
           cairo_stroke(cr);
           SetColour(cr, TEXT_B);
-          cairo_select_font_face(cr, "Noto Sans",
+          cairo_select_font_face(cr, "Times New Roman",
                               CAIRO_FONT_SLANT_NORMAL,
                               CAIRO_FONT_WEIGHT_NORMAL);
           cairo_set_font_size(cr, 12);
