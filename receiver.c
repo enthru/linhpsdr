@@ -1832,8 +1832,8 @@ fprintf(stderr,"create_receiver: buffer_size=%d\n",rx->buffer_size);
 
   rx->output_started=FALSE;
 
-  rx->fps=10;
-  rx->display_average_time=170.0;
+  rx->fps=25;
+  rx->display_average_time=40.0;
 
 #ifdef SOAPYSDR
   if(radio->discovered->device==DEVICE_SOAPYSDR) {
