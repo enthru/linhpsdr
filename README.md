@@ -1,5 +1,16 @@
 # LinHPSDR
 
+### Changelist for this fork
+
+I'm using this software only on Mac OS, so some of this issues can be appeared only on Mac OS and fixes can affect normal working on linux systems :)
+
+1) Added 'space' hotkey to enable MOX in receiver window
+2) Replaced spaces in VFO freqency with zeroes (a bit ugly, but working) to fix wrong digit scrolling.
+3) Changed default FPS for new receivers to 25.
+4) Fix speech processing settings in TX configuration tab (was in wrong position - under equalizer).
+5) Trigger waterfall drag event only when we moving mouse more that 1 pixel to prevent unvanted drag event caused by nmouse jitter.
+
+
 ### Development environment
 
 Development and testing has been run on Ubuntu and Arch Linux. If run on early versions there may be a problem with GTK not supporting the gtk_menu_popup_at_pointer function vfo.c. For information on MacOS support see [MacOS.md](./MacOS.md).
