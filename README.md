@@ -10,6 +10,11 @@ I'm using this software only on Mac OS, so some of this issues can be appeared o
 4) Fix speech processing settings in TX configuration tab (was in wrong position - under equalizer).
 5) Trigger waterfall drag event only when we moving mouse more that 1 pixel to prevent unvanted drag event caused by nmouse jitter.
 
+### TODO for this fork
+
+1) Add font change setting.
+2) Fix waterfall drag (sometimes it jumps on a wrong freq. can be a GTK issue on Mac OS)
+3) Save receiver settings when closing window.
 
 ### Development environment
 
