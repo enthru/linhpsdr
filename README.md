@@ -8,7 +8,7 @@ I'm using this software only on Mac OS, so some of this issues can be appeared o
 2) Replaced spaces in VFO freqency with zeroes (a bit ugly, but working) to fix wrong digit scrolling.
 3) Changed default FPS for new receivers to 25.
 4) Fix speech processing settings in TX configuration tab (was in wrong position - under equalizer).
-5) Trigger waterfall drag event only when we moving mouse more that 1 pixel to prevent unvanted drag event caused by nmouse jitter.
+5) Trigger waterfall drag event only when we moving mouse more that for a one pixel to prevent unvanted drag event caused by mouse jitter.
 
 ### TODO for this fork
 
