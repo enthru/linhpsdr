@@ -899,7 +899,7 @@ GtkWidget *create_radio_dialog(RADIO *radio) {
       att20_b=gtk_check_button_new_with_label("Att20");
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (att20_b), radio->adc[0].att20);
       gtk_grid_attach(GTK_GRID(adc0_grid),att20_b,4,1,1,1);
-      g_signal_connect(preamp_b,"toggled",G_CALLBACK(att20_cb),&radio->adc[0]);
+      g_signal_connect(att20_b,"toggled",G_CALLBACK(att20_cb),&radio->adc[0]);
 
       attenuation_label=gtk_label_new("Attenuation (dB):");
       gtk_grid_attach(GTK_GRID(adc0_grid),attenuation_label,5,1,1,1);
