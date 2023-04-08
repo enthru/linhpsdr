@@ -9,6 +9,7 @@ I'm using this software only on Mac OS, so some of this issues can be appeared o
 3) Changed default FPS for new receivers to 25.
 4) Fix speech processing settings in TX configuration tab (was in wrong position - under equalizer).
 5) Trigger waterfall drag event only when we moving mouse more that for a one pixel to prevent unwanted drag event caused by mouse jitter.
+6) As I'm using TRX-DUO (Red Pitaya clone)  I'm using att10 and att20 outputs to control filters. So I've just added checkboxes in the configuration window to control those outputs - enable them or disable. And of course i've added them in the protocol (v1).
 
 ### TODO for this fork
 
