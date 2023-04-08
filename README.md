@@ -1,5 +1,22 @@
 # LinHPSDR
 
+### Changelist for this fork
+
+I'm using this software only on Mac OS, so some of this issues can be appeared only on Mac OS and fixes can affect normal working on linux systems :)
+
+1) Added 'space' hotkey to enable MOX in receiver window
+2) Replaced spaces in VFO freqency with zeroes (a bit ugly, but working) to fix wrong digit scrolling.
+3) Changed default FPS for new receivers to 25.
+4) Fix speech processing settings in TX configuration tab (was in wrong position - under equalizer).
+5) Trigger waterfall drag event only when we moving mouse more that for a one pixel to prevent unwanted drag event caused by mouse jitter.
+
+### TODO for this fork
+
+1) Add font change setting.
+2) Fix waterfall drag (sometimes it jumps on a wrong freq. can be a GTK issue on Mac OS)
+3) Save receiver settings when closing window.
+4) Pack resources and binary into mac os application.
+
 ### Development environment
 
 Development and testing has been run on Ubuntu and Arch Linux. If run on early versions there may be a problem with GTK not supporting the gtk_menu_popup_at_pointer function vfo.c. For information on MacOS support see [MacOS.md](./MacOS.md).
