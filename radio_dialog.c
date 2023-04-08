@@ -60,6 +60,8 @@ static GtkWidget *mute_rx_b;
 static GtkWidget *dither_b;
 static GtkWidget *random_b;
 static GtkWidget *preamp_b;
+static GtkWidget *att10_b;
+static GtkWidget *att20_b;
 static GtkWidget *attenuation_label;
 static GtkWidget *attenuation_b;
 static GtkWidget *enable_attenuation_b;
@@ -518,6 +520,16 @@ static void preamp_cb(GtkWidget *widget, gpointer data) {
   adc->preamp=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 }
 
+static void att10_cb(GtkWidget *widget, gpointer data) {
+  ADC *adc=(ADC *)data;
+  adc->att10=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+}
+
+static void att20_cb(GtkWidget *widget, gpointer data) {
+  ADC *adc=(ADC *)data;
+  adc->att20=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+}
+
 #ifdef SOAPYSDR
 static void adc_gain_value_changed_cb(GtkWidget *widget, gpointer data) {
   ADC *adc=(ADC *)data;
@@ -879,12 +891,22 @@ GtkWidget *create_radio_dialog(RADIO *radio) {
       gtk_grid_attach(GTK_GRID(adc0_grid),preamp_b,2,1,1,1);
       g_signal_connect(preamp_b,"toggled",G_CALLBACK(preamp_cb),&radio->adc[0]);
   
+      att10_b=gtk_check_button_new_with_label("Att10");
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (att10_b), radio->adc[0].att10);
+      gtk_grid_attach(GTK_GRID(adc0_grid),att10_b,3,1,1,1);
+      g_signal_connect(att10_b,"toggled",G_CALLBACK(att10_cb),&radio->adc[0]);
+
+      att20_b=gtk_check_button_new_with_label("Att20");
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (att20_b), radio->adc[0].att20);
+      gtk_grid_attach(GTK_GRID(adc0_grid),att20_b,4,1,1,1);
+      g_signal_connect(preamp_b,"toggled",G_CALLBACK(att20_cb),&radio->adc[0]);
+
       attenuation_label=gtk_label_new("Attenuation (dB):");
-      gtk_grid_attach(GTK_GRID(adc0_grid),attenuation_label,3,1,1,1);
+      gtk_grid_attach(GTK_GRID(adc0_grid),attenuation_label,5,1,1,1);
   
       attenuation_b=gtk_spin_button_new_with_range(0.0,31.0,1.0);
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(attenuation_b),(double)radio->adc[0].attenuation);
-      gtk_grid_attach(GTK_GRID(adc0_grid),attenuation_b,4,1,1,1);
+      gtk_grid_attach(GTK_GRID(adc0_grid),attenuation_b,6,1,1,1);
       g_signal_connect(attenuation_b,"value_changed",G_CALLBACK(attenuation_value_changed_cb),&radio->adc[0]);
       break;
   }
@@ -940,12 +962,22 @@ GtkWidget *create_radio_dialog(RADIO *radio) {
       gtk_grid_attach(GTK_GRID(adc1_grid),preamp_b,2,1,1,1);
       g_signal_connect(preamp_b,"toggled",G_CALLBACK(preamp_cb),&radio->adc[1]);
 
+      att10_b=gtk_check_button_new_with_label("Att10");
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (att10_b), radio->adc[1].att10);
+      gtk_grid_attach(GTK_GRID(adc1_grid),att10_b,3,1,1,1);
+      g_signal_connect(att10_b,"toggled",G_CALLBACK(att10_cb),&radio->adc[1]);
+
+      att20_b=gtk_check_button_new_with_label("Att20");
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (att20_b), radio->adc[1].att20);
+      gtk_grid_attach(GTK_GRID(adc1_grid),att20_b,4,1,1,1);
+      g_signal_connect(att20_b,"toggled",G_CALLBACK(att20_cb),&radio->adc[1]);
+
       attenuation_label=gtk_label_new("Attenuation (dB):");
-      gtk_grid_attach(GTK_GRID(adc1_grid),attenuation_label,3,1,1,1);
+      gtk_grid_attach(GTK_GRID(adc1_grid),attenuation_label,5,1,1,1);
 
       attenuation_b=gtk_spin_button_new_with_range(0.0,31.0,1.0);
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(attenuation_b),(double)radio->adc[1].attenuation);
-      gtk_grid_attach(GTK_GRID(adc1_grid),attenuation_b,4,1,1,1);
+      gtk_grid_attach(GTK_GRID(adc1_grid),attenuation_b,6,1,1,1);
       g_signal_connect(attenuation_b,"value_changed",G_CALLBACK(attenuation_value_changed_cb),&radio->adc[1]);
       break;
       

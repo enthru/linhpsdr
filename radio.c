@@ -234,6 +234,14 @@ g_print("radio_save_state: %s\n",filename);
     sprintf(name,"radio.adc[%d].preamp",i);
     sprintf(value,"%d",radio->adc[i].preamp);
     setProperty(name,value);
+
+    sprintf(name,"radio.adc[%d].att10",i);
+    sprintf(value,"%d",radio->adc[i].att10);
+    setProperty(name,value);
+    sprintf(name,"radio.adc[%d].att20",i);
+    sprintf(value,"%d",radio->adc[i].att20);
+    setProperty(name,value);
+
     sprintf(name,"radio.adc[%d].attenuation",i);
     sprintf(value,"%d",radio->adc[i].attenuation);
     setProperty(name,value);
@@ -415,6 +423,14 @@ void radio_restore_state(RADIO *radio) {
     sprintf(name,"radio.adc[%d].preamp",i);
     value=getProperty(name);
     if(value!=NULL) radio->adc[i].preamp=atoi(value);
+
+    sprintf(name,"radio.adc[%d].att10",i);
+    value=getProperty(name);
+    if(value!=NULL) radio->adc[i].att10=atoi(value);
+    sprintf(name,"radio.adc[%d].att20",i);
+    value=getProperty(name);
+    if(value!=NULL) radio->adc[i].att20=atoi(value);
+
     sprintf(name,"radio.adc[%d].attenuation",i);
     value=getProperty(name);
     if(value!=NULL) radio->adc[i].attenuation=atoi(value);
@@ -1432,6 +1448,8 @@ g_print("create_radio for %s %d\n",d->name,d->device);
   r->adc[0].dither=FALSE;
   r->adc[0].random=FALSE;
   r->adc[0].preamp=FALSE;
+  r->adc[0].att10=FALSE;
+  r->adc[0].att20=FALSE;
   r->adc[0].attenuation=0;
   r->adc_overload = 0;
   
@@ -1453,6 +1471,8 @@ g_print("create_radio for %s %d\n",d->name,d->device);
   r->adc[1].dither=FALSE;
   r->adc[1].random=FALSE;
   r->adc[1].preamp=FALSE;
+  r->adc[1].att10=FALSE;
+  r->adc[1].att20=FALSE;
   r->adc[1].attenuation=0;
 #ifdef SOAPYSDR
   if(r->discovered->device==DEVICE_SOAPYSDR) {

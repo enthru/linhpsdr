@@ -990,6 +990,12 @@ void ozy_send_buffer() {
     if(radio->adc[0].preamp) {
       output_buffer[C3]|=LT2208_GAIN_ON;
     }
+    if(radio->adc[0].att10) {
+      output_buffer[C3]|=ALEX_ATTENUATION_10DB;
+    }
+    if(radio->adc[0].att20) {
+      output_buffer[C3]|=ALEX_ATTENUATION_20DB;
+    }
 
     switch(radio->adc[0].antenna) {
       case 0:  // ANT 1
