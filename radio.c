@@ -282,6 +282,8 @@ g_print("radio_save_state: %s\n",filename);
   setProperty("radio.temp_alarm",value);
   sprintf(value,"%f",radio->swr_alarm_value);
   setProperty("radio.swr_alarm",value);
+  sprintf(value,"%d",radio->ppm_correction_value);
+  setProperty("radio.ppm_correction_value",value);
 
 /*
   sprintf(value,"%d",rigctl_enable);
@@ -490,6 +492,8 @@ void radio_restore_state(RADIO *radio) {
   if(value!=NULL) radio->temperature_alarm_value=atoi(value);
   value=getProperty("radio.swr_alarm");
   if(value!=NULL) radio->swr_alarm_value=atof(value);
+  value=getProperty("radio.ppm_correction_value");
+  if(value!=NULL) radio->ppm_correction_value=atoi(value);
 
   value=getProperty("radio.iqswap");
   if(value) radio->iqswap=atoi(value);
@@ -1508,6 +1512,7 @@ g_print("create_radio for %s %d\n",d->name,d->device);
   r->which_audio_backend=0;
 
   r->swr_alarm_value = 2.0;
+  r->ppm_correction_value = 0;
   r->temperature_alarm_value = 50;  
   r->qos_flag = FALSE;
   

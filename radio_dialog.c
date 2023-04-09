@@ -67,6 +67,7 @@ static GtkWidget *attenuation_b;
 static GtkWidget *enable_attenuation_b;
 static GtkWidget *disable_fpgaclk_b;
 static GtkWidget *swr_alarm_b;
+static GtkWidget *ppm_correction_b;
 static GtkWidget *temperature_alarm_b;
 
 static GtkWidget *adc1_frame;
@@ -429,6 +430,11 @@ static void panadapter_calibrate_changed_cb(GtkWidget *widget, gpointer data) {
 static void swr_alarm_changed_cb(GtkWidget *widget, gpointer data) {
   RADIO *radio=(RADIO *)data;
   radio->swr_alarm_value=gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
+}
+
+static void ppm_correction_changed_cb(GtkWidget *widget, gpointer data) {
+  RADIO *radio=(RADIO *)data;
+  radio->ppm_correction_value=gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
 }
 
 static void temperature_alarm_changed_cb(GtkWidget *widget, gpointer data) {
@@ -1109,16 +1115,27 @@ GtkWidget *create_radio_dialog(RADIO *radio) {
   gtk_grid_attach(GTK_GRID(config_grid),swr_alarm_b,1,0,1,1);
   g_signal_connect(swr_alarm_b,"value_changed",G_CALLBACK(swr_alarm_changed_cb),radio);
 
+  // PPM correction
+  GtkWidget *ppm_correction_label=gtk_label_new("PPM correction ");
+  gtk_widget_show(ppm_correction_label);
+  gtk_grid_attach(GTK_GRID(config_grid),ppm_correction_label,2,0,1,1);
+
+  ppm_correction_b=gtk_spin_button_new_with_range(-100, 100, 1);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(ppm_correction_b), radio->ppm_correction_value);
+  gtk_widget_show(ppm_correction_b);
+  gtk_grid_attach(GTK_GRID(config_grid),ppm_correction_b,3,0,1,1);
+  g_signal_connect(ppm_correction_b,"value_changed",G_CALLBACK(ppm_correction_changed_cb),radio);
+
   // Temperature alarm threshold
   if (radio->discovered->device == DEVICE_HERMES_LITE2) {
     GtkWidget *temp_alarm_label=gtk_label_new("Temp alarm at ");
     gtk_widget_show(temp_alarm_label);
-    gtk_grid_attach(GTK_GRID(config_grid),temp_alarm_label,2,0,1,1);
+    gtk_grid_attach(GTK_GRID(config_grid),temp_alarm_label,4,0,1,1);
 
     temperature_alarm_b=gtk_spin_button_new_with_range(30.0, 60.0, 1.0);
     gtk_spin_button_set_value(GTK_SPIN_BUTTON(temperature_alarm_b), (double)radio->temperature_alarm_value);
     gtk_widget_show(temperature_alarm_b);
-    gtk_grid_attach(GTK_GRID(config_grid),temperature_alarm_b,3,0,1,1);
+    gtk_grid_attach(GTK_GRID(config_grid),temperature_alarm_b,5,0,1,1);
     g_signal_connect(temperature_alarm_b,"value_changed",G_CALLBACK(temperature_alarm_changed_cb),radio);
   }
 
