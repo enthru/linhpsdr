@@ -122,6 +122,9 @@ void receiver_save_state(RECEIVER *rx) {
   sprintf(name,"receiver[%d].panadapter_agc_line",rx->channel);
   sprintf(value,"%d",rx->panadapter_agc_line);
   setProperty(name,value);
+  sprintf(name,"receiver[%d].panadapter_single_color",rx->channel);
+  sprintf(value,"%d",rx->panadapter_single_color);
+  setProperty(name,value);
 
   if(rx->waterfall_automatic == FALSE) {
       sprintf(name,"receiver[%d].waterfall_low",rx->channel);
@@ -611,6 +614,11 @@ void receiver_restore_state(RECEIVER *rx) {
   value=getProperty(name);
   if(value) rx->panadapter_filled=atoi(value);
   sprintf(name,"receiver[%d].panadapter_gradient",rx->channel);
+  
+  sprintf(name,"receiver[%d].panadapter_single_color",rx->channel);
+  value=getProperty(name);
+  if(value) rx->panadapter_single_color=atoi(value);
+
   value=getProperty(name);
   if(value) rx->panadapter_gradient=atoi(value);
   sprintf(name,"receiver[%d].panadapter_agc_line",rx->channel);
@@ -1873,6 +1881,8 @@ fprintf(stderr,"create_receiver: fft_size=%d\n",rx->fft_size);
   rx->panadapter_filled=TRUE;
   rx->panadapter_gradient=TRUE;
   rx->panadapter_agc_line=TRUE;
+
+  rx->panadapter_single_color=TRUE;
 
   rx->waterfall_automatic=TRUE;
   rx->waterfall_ft8_marker=FALSE;
