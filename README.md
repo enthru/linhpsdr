@@ -11,6 +11,9 @@ I'm using this software only on Mac OS, so some of this issues can be appeared o
 5) Trigger waterfall drag event only when we moving mouse more that for a one pixel to prevent unwanted drag event caused by mouse jitter.
 6) As I'm using TRX-DUO (Red Pitaya clone)  I'm using att10 and att20 outputs to control filters. So I've just added checkboxes in the configuration window to control those outputs - enable them or disable.
 7) Added ppm correction setting.
+8) Auto disabling squelch when non FM mode choosen
+9) Disable squelch in NFM mode if setting for squelch of too low (there is no button for squelch so using just squelch bar to disable it)
+10) Fixed deviation for NFM in receiver window
 
 ### TODO for this fork
 
