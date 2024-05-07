@@ -14,6 +14,8 @@ I'm using this software only on Mac OS, so some of this issues can be appeared o
 8) Auto disabling squelch when non FM mode choosen
 9) Disable squelch in NFM mode if setting for squelch of too low (there is no button for squelch so using just squelch bar to disable it)
 10) Fixed deviation for NFM in receiver window
+11) Fix switch tx mode to receiving when changing transmiter
+12) Ignore SOAPY protocol for PA calibration settings (display all bands)
 
 ### TODO for this fork
 
