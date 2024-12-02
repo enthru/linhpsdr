@@ -121,7 +121,7 @@ Development and testing has been run on MacOS Sierra 10.12.6 and MacOS high Sier
 ```
   git clone https://github.com/g0orx/wdsp.git
   cd wdsp
-  make -f Makefile.mac install
+  make install
 ```
 
 ### To download, compile and install linHPSDR
@@ -129,7 +129,7 @@ Development and testing has been run on MacOS Sierra 10.12.6 and MacOS high Sier
 ```
   git clone https://github.com/m5evt/linhpsdr.git
   cd linhpsdr
-  make -f Makefile.mac install
+  make install
 ```
 
 The build installs linHPSDR into `/usr/local/bin`. To run it, type `linhpsdr` on the command line.
