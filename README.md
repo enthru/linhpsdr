@@ -17,13 +17,6 @@ I'm using this software only on Mac OS, so some of this issues can be appeared o
 11) Fix switch tx mode to receiving when changing transmiter
 12) Ignore SOAPY protocol for PA calibration settings (display all bands)
 
-### TODO for this fork
-
-1) Add font change setting.
-2) Fix waterfall drag (sometimes it jumps on a wrong freq. can be a GTK issue on Mac OS)
-3) Save receiver settings when closing window.
-4) Pack resources and binary into mac os application.
-
 ### Development environment
 
 Development and testing has been run on Ubuntu and Arch Linux. If run on early versions there may be a problem with GTK not supporting the gtk_menu_popup_at_pointer function vfo.c. For information on MacOS support see [MacOS.md](./MacOS.md).
