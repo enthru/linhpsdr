@@ -1705,8 +1705,6 @@ void ozy_send_buffer() {
         }
 
         output_buffer[C1]=0x00;
-
-        gint tx_mode = transmitter_get_mode(radio->transmitter);
         if(tx_mode!=CWU && tx_mode!=CWL) {
           output_buffer[C1]|=0x00;
         } else {

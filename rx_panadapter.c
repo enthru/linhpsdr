@@ -43,9 +43,6 @@
 #include "level_meter.h"
 
 #define LINE_WIDTH 1.0
-#include "subrx.h"
-
-#define LINE_WIDTH 0.5
 
 int signal_vertices_size=-1;
 float *signal_vertices=NULL;
@@ -427,74 +424,38 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
     cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.75);
     double filter_left=((double)rx->pixels/2.0)-(double)rx->pan+(((double)rx->filter_low_a+rx->ctun_offset)/rx->hz_per_pixel);
     double filter_right=((double)rx->pixels/2.0)-(double)rx->pan+(((double)rx->filter_high_a+rx->ctun_offset)/rx->hz_per_pixel);
-    cairo_rectangle(cr, filter_left, 10.0, filter_right-filter_left, (double)display_height);
+
+
+    cairo_pattern_t *pat3 = cairo_pattern_create_linear(filter_left, 0, filter_left, (double)display_height);
+
+    //cairo_pattern_add_color_stop_rgb(pat3, 0.01, 0.1, 0.1, 0.1);
+    cairo_pattern_add_color_stop_rgba(pat3, 0.1, 0.5, 0.5, 0.5, 0.75);
+    cairo_pattern_add_color_stop_rgb(pat3, 0.7, 0.1, 0.1, 0.1);
+
+    cairo_rectangle(cr, filter_left, 0.0, filter_right-filter_left, (double)display_height);
+
+    cairo_set_source(cr, pat3);
+
     cairo_fill(cr);
 
-    double cursor;
-    // draw cursor for cw mode
-    if(rx->mode_a==CWU || rx->mode_a==CWL) {
-      SetColour(cr, TEXT_B);
-      cursor=filter_left+((filter_right-filter_left)/2.0);
-      cairo_move_to(cr,cursor,10.0);
-      cairo_line_to(cr,cursor,(double)display_height-20);
-      cairo_stroke(cr);
-    } else {
-      SetColour(cr, TEXT_A);
-      cursor=(double)(rx->pixels/2.0)-(double)rx->pan+(rx->ctun_offset/rx->hz_per_pixel);
-      cairo_move_to(cr,cursor,10.0);
-      cairo_line_to(cr,cursor,(double)display_height-20.0);
-      cairo_stroke(cr);
-    }
+    // Show VFO B (tx) for split mode
 
-    // draw the frequency
-    char temp[32];
-    long long af=rx->ctun?rx->ctun_frequency:rx->frequency_a;
-    sprintf(temp,"%5lld.%03lld.%03lld",af/(long long)1000000,(af%(long long)1000000)/(long long)1000,af%(long long)1000);
-    cairo_set_font_size(cr, 12);
-    cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
-    cairo_text_extents(cr, temp, &extents);
-    cairo_move_to(cr, (double)cursor-(extents.width/2.0), 10);
-    cairo_show_text(cr, temp);
-
-
-    // Show VFO B (tx) for split mode or if subrx enabled
-    if(rx->split==SPLIT_ON || rx->subrx_enable) {
-      double diff = (double)(rx->frequency_b - rx->frequency_a)/rx->hz_per_pixel;
-      if(rx->mode_a==CWU || rx->mode_a==CWL) {
-        SetColour(cr, WARNING);
-        double cw_frequency=filter_left+((filter_right-filter_left)/2.0);
-	cursor=cw_frequency+diff;
-        cairo_move_to(cr,cursor,20.0);
-        cairo_line_to(cr,cursor,(double)display_height-20);
-        cairo_stroke(cr);
-      } else if(rx->subrx_enable) {
-        // VFO B cursor
-        SetColour(cr, WARNING);
-	cursor=(double)(rx->pixels/2.0)-(double)rx->pan+diff;
-        cairo_move_to(cr,cursor,20.0);
-        cairo_line_to(cr,cursor,(double)display_height-20);
-        cairo_stroke(cr);
-
-        cairo_set_source_rgba (cr, 0.7, 0.7, 0.7, 0.75);
-#ifdef USE_VFO_B_MODE_AND_FILTER
-        double filter_left=((double)rx->pixels/2.0)-(double)rx->pan+(((double)rx->filter_low_b)/rx->hz_per_pixel)+diff;
-        double filter_right=((double)rx->pixels/2.0)-(double)rx->pan+(((double)rx->filter_high_b)/rx->hz_per_pixel)+diff;
-#else
-        double filter_left=((double)rx->pixels/2.0)-(double)rx->pan+(((double)rx->filter_low_a)/rx->hz_per_pixel)+diff;
-        double filter_right=((double)rx->pixels/2.0)-(double)rx->pan+(((double)rx->filter_high_a)/rx->hz_per_pixel)+diff;
-#endif
-        cairo_rectangle(cr, filter_left, 20.0, filter_right-filter_left, (double)display_height-20);
-        cairo_fill(cr);
+    double cw_offset = 0;
+    if(rx->mode_a==CWL || rx->mode_a==CWU) {
+      if(rx->mode_a==CWU) {
+        cw_offset=-radio->cw_keyer_sidetone_frequency;
+      } else {
+        cw_offset=+radio->cw_keyer_sidetone_frequency;
       }
-
-      // draw the frequency
-      char temp[32];
-      sprintf(temp,"%5lld.%03lld.%03lld",rx->frequency_b/(long long)1000000,(rx->frequency_b%(long long)1000000)/(long long)1000,rx->frequency_b%(long long)1000);
-      cairo_set_font_size(cr, 12);
-      cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
-      cairo_text_extents(cr, temp, &extents);
-      cairo_move_to(cr, (double)cursor-(extents.width/2.0), 20);
-      cairo_show_text(cr, temp);
+    }
+    // VFO B/sub rx filter
+    if(rx->subrx!=NULL) {
+      i=(int)(((double)rx->frequency_b-(double)min_display)/rx->hz_per_pixel);
+      filter_left = i + (rx->filter_low_a / rx->hz_per_pixel);
+      filter_right = i + (rx->filter_high_a / rx->hz_per_pixel);
+      cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.75);
+      cairo_rectangle(cr, filter_left, 0.0, filter_right-filter_left, (double)display_height);
+      cairo_fill(cr);
     }
 
     cairo_set_line_width (cr, LINE_WIDTH);

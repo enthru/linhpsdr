@@ -218,7 +218,6 @@ static void sample_rate_cb(GtkComboBoxText *widget,gpointer data) {
       break;
 #ifdef SOAPYSDR
     case PROTOCOL_SOAPYSDR:
-      //soapy_protocol_stop();
       break;
 #endif
   }
@@ -579,33 +578,6 @@ static void freetune_cb(GtkWidget *widget, gpointer data) {
   g_print("radio_dialog: freetune rx=%d enable=%d\n", rx->channel, enable);
 }
 
-static void penelope_changed_cb(GtkWidget *widget, gpointer data) {
-  RADIO *r=(RADIO *)data;
-  r->penelope=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-}
-
-/*
-static void rigctl_cb(GtkWidget *widget, gpointer data) {
-  int i;
-
-  rigctl_enable=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-  if(rigctl_enable) {
-    for(i=0;i<radio->discovered->supported_receivers;i++) {
-      if(radio->receiver[i]!=NULL) {
-        launch_rigctl(radio->receiver[i]);
-      }
-    }
-    gtk_widget_set_sensitive(rigctl_base, FALSE);
-  } else {
-    for(i=0;i<radio->discovered->supported_receivers;i++) {
-      if(radio->receiver[i]!=NULL) {
-        close_rigctl_ports(radio->receiver[i]);
-      }
-    }
-    gtk_widget_set_sensitive(rigctl_base, TRUE);
-  }
-}
-
 #ifdef CWDAEMON
 static void cwdaemon_cb(GtkWidget *widget, gpointer data) {
   RADIO *radio=(RADIO *)data;
@@ -683,19 +655,11 @@ GtkWidget *create_radio_dialog(RADIO *radio) {
   if ((radio->discovered->device == DEVICE_HERMES_LITE2) || (radio->discovered->device == DEVICE_HERMES_LITE)) {
     /* no IQ swap for Hermes Lite */
   }
-#ifdef SOAPYSDR
-  else if(radio->discovered->device!=DEVICE_SOAPYSDR) {
+  else {
     GtkWidget *iqswap=gtk_check_button_new_with_label("Swap I & Q");
     gtk_grid_attach(GTK_GRID(model_grid),iqswap,x,0,1,1);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(iqswap),radio->iqswap);
     g_signal_connect(iqswap,"toggled",G_CALLBACK(iqswap_changed_cb),radio);
-  }
-#endif
-  else if(radio->discovered->device==DEVICE_METIS) {
-    GtkWidget *penelope=gtk_check_button_new_with_label("Penelope");
-    gtk_grid_attach(GTK_GRID(model_grid),penelope,x,0,1,1);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(penelope),radio->penelope);
-    g_signal_connect(penelope,"toggled",G_CALLBACK(penelope_changed_cb),radio);
   }
   x++;
 
@@ -1408,9 +1372,6 @@ GtkWidget *create_radio_dialog(RADIO *radio) {
   gtk_combo_box_set_active(GTK_COMBO_BOX(region_combo),radio->region);
   gtk_grid_attach(GTK_GRID(region_grid),region_combo,0,0,1,1);
   g_signal_connect(region_combo,"changed",G_CALLBACK(region_cb),radio);
-
-  x=0;
-  y=0;
 
   return grid;
 }
