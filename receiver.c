@@ -141,6 +141,10 @@ void receiver_save_state(RECEIVER *rx) {
   sprintf(value,"%d",rx->waterfall_ft8_marker);
   setProperty(name,value);
 
+  sprintf(name,"receiver[%d].waterfall_color_theme",rx->channel);
+  sprintf(value,"%d",rx->waterfall_color_theme);
+  setProperty(name,value);
+
   sprintf(name,"receiver[%d].frequency_a",rx->channel);
   sprintf(value,"%" G_GINT64_FORMAT,rx->frequency_a);
   setProperty(name,value);
@@ -392,6 +396,10 @@ void receiver_save_state(RECEIVER *rx) {
 
   sprintf(name,"receiver[%d].show_rx",rx->channel);
   sprintf(value,"%i", rx->show_rx);
+  setProperty(name,value);
+
+  sprintf(name,"receiver[%d].waterfall_color_theme",rx->channel);
+  sprintf(value,"%d",rx->waterfall_color_theme);
   setProperty(name,value);
 
 fprintf(stderr,"receiver_save_sate: paned_position=%d paned_height=%d paned_percent=%f\n",rx->paned_position, paned_height, paned_percent);
@@ -648,6 +656,10 @@ void receiver_restore_state(RECEIVER *rx) {
   value=getProperty(name);
   if(value) rx->waterfall_ft8_marker=atoi(value);
 
+  sprintf(name,"receiver[%d].waterfall_color_theme",rx->channel);
+  value=getProperty(name);
+  if(value) rx->waterfall_color_theme=atoi(value);
+
   sprintf(name,"receiver[%d].split",rx->channel);
   value=getProperty(name);
   if(value) rx->split=atoi(value);
@@ -685,6 +697,10 @@ void receiver_restore_state(RECEIVER *rx) {
   sprintf(name,"receiver[%d].show_rx",rx->channel);
   value=getProperty(name);
   if(value) rx->show_rx=atoi(value);
+
+  sprintf(name,"receiver[%d].waterfall_color_theme",rx->channel);
+  value=getProperty(name);
+  if(value) rx->waterfall_color_theme=atoi(value);
 }
 
 void receiver_xvtr_changed(RECEIVER *rx) {
@@ -692,11 +708,6 @@ void receiver_xvtr_changed(RECEIVER *rx) {
 
 void receiver_change_sample_rate(RECEIVER *rx,int sample_rate) {
 g_print("receiver_change_sample_rate: from %d to %d radio=%d\n",rx->sample_rate,sample_rate,radio->sample_rate);
-#ifdef SOAPYSDR
-  if(radio->discovered->protocol==PROTOCOL_SOAPYSDR) {
-    soapy_protocol_stop();
-  }
-#endif
   g_mutex_lock(&rx->mutex);
   SetChannelState(rx->channel,0,1);
   g_free(rx->audio_output_buffer);
@@ -705,6 +716,7 @@ g_print("receiver_change_sample_rate: from %d to %d radio=%d\n",rx->sample_rate,
   rx->output_samples=rx->buffer_size/(rx->sample_rate/48000);
   rx->audio_output_buffer=g_new0(gdouble,2*rx->output_samples);
   rx->hz_per_pixel=(double)rx->sample_rate/(double)rx->samples;
+  //SetInputSamplerate(rx->channel, sample_rate);
   SetAllRates(rx->channel,rx->sample_rate,48000,48000);
 
   receiver_init_analyzer(rx);
@@ -728,7 +740,6 @@ fprintf(stderr,"receiver_change_sample_rate: channel=%d rate=%d buffer_size=%d o
     rx->resample_step=radio->sample_rate/rx->sample_rate;
 g_print("receiver_change_sample_rate: resample_step=%d\n",rx->resample_step);
 */
-    soapy_protocol_start_receiver(rx);
   }
 #endif
 
@@ -1115,12 +1126,15 @@ gboolean receiver_button_release_event_cb(GtkWidget *widget, GdkEventButton *eve
 }
 
 gboolean receiver_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *event, gpointer data) {
+  gint x,y;
   GdkModifierType state;
   RECEIVER *rx=(RECEIVER *)data;
   long long delta;
 
+  x=event->x;
+  y=event->y;
   state=event->state;
-  int moved=event->x-rx->last_x;
+  int moved=x-rx->last_x;
   if(rx->is_panning) {
     int pan=rx->pan+(moved*rx->zoom);
     if(pan<0) {
@@ -1129,22 +1143,20 @@ gboolean receiver_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *even
       pan=rx->pixels-rx->panadapter_width;
     }
     rx->pan=pan;
-    rx->last_x=event->x;
+    rx->last_x=x;
   } else if(!rx->locked) {
     if((state & GDK_BUTTON1_MASK) == GDK_BUTTON1_MASK) {
       //receiver_move(rx,(long long)((double)(moved*rx->hz_per_pixel)),FALSE);
       receiver_move(rx,(long long)((double)(moved*rx->hz_per_pixel)),TRUE);
-      rx->last_x=event->x;
-      rx->has_moved=TRUE;
+      rx->last_x=x;
+      if (moved > 1 || moved < -1) {
+        rx->has_moved=TRUE;
+      }
     } else {
-      if(event->x<35 && widget==rx->panadapter) {
-        gdk_window_set_cursor(gtk_widget_get_window(widget),gdk_cursor_new_from_name(gdk_display_get_default(),"v_double_arrow"));
-      } else if(rx->zoom>1 && event->y>=rx->panadapter_height-20) {
-	gdk_window_set_cursor(gtk_widget_get_window(widget),gdk_cursor_new_from_name(gdk_display_get_default(),"h_double_arrow"));
-      } else if(event->x<rx->panadapter_width/2) {
-        gdk_window_set_cursor(gtk_widget_get_window(widget),gdk_cursor_new_from_name(gdk_display_get_default(),"left_side"));
+      if(event->x>4 && event->x<35) {
+        gdk_window_set_cursor(gtk_widget_get_window(widget),gdk_cursor_new(GDK_DOUBLE_ARROW));
       } else {
-        gdk_window_set_cursor(gtk_widget_get_window(widget),gdk_cursor_new_from_name(gdk_display_get_default(),"right_side"));
+        gdk_window_set_cursor(gtk_widget_get_window(widget),gdk_cursor_new(GDK_CROSSHAIR));
       }
     }
   }
@@ -1153,9 +1165,11 @@ gboolean receiver_motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *even
 
 gboolean receiver_scroll_event_cb(GtkWidget *widget, GdkEventScroll *event, gpointer data) {
   RECEIVER *rx=(RECEIVER *)data;
+  int x=(int)event->x;
+  int y=(int)event->y;
   int half=rx->panadapter_height/2;
 
-  if(rx->zoom>1 && event->y>=rx->panadapter_height-20) {
+  if(rx->zoom>1 && y>=rx->panadapter_height-20) {
     int pan;
     if(event->direction==GDK_SCROLL_UP) {
       pan=rx->pan+rx->zoom;
@@ -1170,15 +1184,15 @@ gboolean receiver_scroll_event_cb(GtkWidget *widget, GdkEventScroll *event, gpoi
     }
     rx->pan=pan;
   } else if(!rx->locked) {
-    if((event->x<35) && (widget==rx->panadapter)) {
+    if((x>4 && x<35) && (widget==rx->panadapter)) {
       if(event->direction==GDK_SCROLL_UP) {
-        if(event->y<half) {
+        if(y<half) {
           rx->panadapter_high=rx->panadapter_high-5;
         } else {
           rx->panadapter_low=rx->panadapter_low-5;
         }
       } else {
-        if(event->y<half) {
+        if(y<half) {
           rx->panadapter_high=rx->panadapter_high+5;
         } else {
           rx->panadapter_low=rx->panadapter_low+5;
@@ -1620,20 +1634,15 @@ g_print("receiver_update_title: %s\n",title);
   gtk_window_set_title(GTK_WINDOW(rx->window),title);
 }
 
-static gboolean enter (GtkWidget *widget, GdkEventCrossing *event, void *user_data) {
-  RECEIVER *rx=(RECEIVER *)user_data;
-  if(event->x<35 && widget==rx->panadapter) {
-    gdk_window_set_cursor(gtk_widget_get_window(widget),gdk_cursor_new_from_name(gdk_display_get_default(),"v_double_arrow"));
-  } else if(rx->zoom>1 && event->y>=rx->panadapter_height-20) {
-    gdk_window_set_cursor(gtk_widget_get_window(widget),gdk_cursor_new_from_name(gdk_display_get_default(),"h_double_arrow"));
-  } else if(event->x<rx->panadapter_width/2) {
-    gdk_window_set_cursor(gtk_widget_get_window(widget),gdk_cursor_new_from_name(gdk_display_get_default(),"left_side"));
-  } else {
-    gdk_window_set_cursor(gtk_widget_get_window(widget),gdk_cursor_new_from_name(gdk_display_get_default(),"right_side"));
-  }
-  return FALSE;
+static gboolean enter (GtkWidget *ebox, GdkEventCrossing *event, void *user_data) {
+   RECEIVER *rx=(RECEIVER *)user_data;
+   if((event->x>4 && event->x<35) && (ebox==rx->panadapter)) {
+     gdk_window_set_cursor(gtk_widget_get_window(ebox),gdk_cursor_new(GDK_DOUBLE_ARROW));
+   } else {
+     gdk_window_set_cursor(gtk_widget_get_window(ebox),gdk_cursor_new(GDK_CROSSHAIR));
+   }
+   return FALSE;
 }
-
 
 static gboolean leave (GtkWidget *ebox, GdkEventCrossing *event, void *user_data) {
    gdk_window_set_cursor(gtk_widget_get_window(ebox),gdk_cursor_new(GDK_ARROW));
@@ -1756,6 +1765,7 @@ void receiver_init_analyzer(RECEIVER *rx) {
 }
 
 void receiver_change_zoom(RECEIVER *rx,int zoom) {
+g_print("%s: %d\n",__FUNCTION__,zoom);
   rx->zoom=zoom;
   rx->pixels=rx->panadapter_width*rx->zoom;
   if(rx->zoom==1) {
@@ -1775,6 +1785,9 @@ void receiver_change_zoom(RECEIVER *rx,int zoom) {
 
 
 RECEIVER *create_receiver(int channel,int sample_rate, gboolean show_rx) {
+
+
+
   RECEIVER *rx=g_new0(RECEIVER,1);
   char name [80];
   char *value;
@@ -1996,6 +2009,7 @@ fprintf(stderr,"create_receiver: fft_size=%d\n",rx->fft_size);
 
   rx->waterfall_automatic=TRUE;
   rx->waterfall_ft8_marker=FALSE;
+  rx->waterfall_color_theme=1;
 
   rx->vfo_surface=NULL;
   rx->meter_surface=NULL;
@@ -2092,6 +2106,13 @@ g_print("create_receiver: OpenChannel: channel=%d buffer_size=%d sample_rate=%d 
   create_nobEXT(rx->channel,1, 0, rx->buffer_size, rx->sample_rate, 0.00001, 0.00001, 0.00001, 0.05, 4.95);
   RXASetNC(rx->channel, rx->fft_size);
   RXASetMP(rx->channel, rx->low_latency);
+#ifdef SOAPYSDR
+  if(radio->discovered->protocol==PROTOCOL_SOAPYSDR) {
+    rx->resample_step=radio->sample_rate/rx->sample_rate;
+g_print("receiver_change_sample_rate: resample_step=%d\n",rx->resample_step);
+  }
+#endif
+
 
   frequency_changed(rx);
   receiver_mode_changed(rx,rx->mode_a);

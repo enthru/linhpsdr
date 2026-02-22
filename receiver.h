@@ -255,6 +255,8 @@ typedef struct _receiver {
   gboolean subrx_enable;
   void *subrx;
 
+  int resample_step;
+
   void *resampler;
   gdouble *resampled_buffer;
   gint resampled_buffer_size;
@@ -285,6 +287,7 @@ typedef struct _receiver {
   gboolean rigctl_debug;
   void *rigctl;
   gboolean freetune;
+  int waterfall_color_theme;
 
 } RECEIVER;
 

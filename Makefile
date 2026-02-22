@@ -306,7 +306,8 @@ tx_info.o \
 tx_info_meter.o \
 peak_detect.o \
 subrx.o \
-actions.o
+actions.o \
+waterfall_theme.o
 
 
 $(PROGRAM): $(OBJS) $(SOAPYSDR_OBJS) $(CWDAEMON_OBJS) $(MIDI_OBJS) $(PURESIGNAL_OBJS)
