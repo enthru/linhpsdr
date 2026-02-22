@@ -1100,7 +1100,7 @@ long long transmitter_get_frequency(TRANSMITTER *tx) {
     if(rx->split) {
       f=rx->frequency_b-rx->lo_b+rx->error_b+(long long)(rx->frequency_a-rx->lo_a)/1000000*radio->ppm_correction_value;
     } else {
-      if(rx->ctun) {
+    if(rx->ctun || rx->freetune) {
         f=rx->ctun_frequency-rx->lo_a+rx->error_a+(long long)(rx->frequency_a-rx->lo_a)/1000000*radio->ppm_correction_value;
       } else {
         f=rx->frequency_a-rx->lo_a+rx->error_a+(long long)(rx->frequency_a-rx->lo_a)/1000000*radio->ppm_correction_value;

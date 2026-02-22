@@ -17,6 +17,8 @@ I'm using this software only on Mac OS, so some of this issues can be appeared o
 11) Fix switch tx mode to receiving when changing transmiter
 12) Ignore SOAPY protocol for PA calibration settings (display all bands)
 13) Added freetune mode
+14) Add waterfall themes
+15) Changed default paremeters for NR filter
 
 ### Development environment
 
@@ -127,5 +129,3 @@ Development and testing has been run on MacOS Sierra 10.12.6 and MacOS high Sier
 ```
 
 The build installs linHPSDR into `/usr/local/bin`. To run it, type `linhpsdr` on the command line.
-
-

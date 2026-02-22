@@ -2142,7 +2142,7 @@ g_print("receiver_change_sample_rate: resample_step=%d\n",rx->resample_step);
   SetRXAEMNRRun(rx->channel, rx->nr2);
   SetRXAEMNRaeRun(rx->channel, rx->nr2_ae);
 
-  SetRXAANRVals(rx->channel, 64, 16, 16e-4, 10e-7); // defaults
+  SetRXAANRVals(rx->channel, 80, 24, 24e-4, 8e-7); // defaults
   SetRXAANRRun(rx->channel, rx->nr);
   SetRXAANFRun(rx->channel, rx->anf);
   SetRXASNBARun(rx->channel, rx->snb);
