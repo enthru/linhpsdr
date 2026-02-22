@@ -43,6 +43,9 @@
 #include "level_meter.h"
 
 #define LINE_WIDTH 1.0
+#include "subrx.h"
+
+#define LINE_WIDTH 0.5
 
 int signal_vertices_size=-1;
 float *signal_vertices=NULL;
@@ -59,15 +62,15 @@ static gboolean resize_timeout(void *data) {
 
   // Hidden rx may be associated with this display
   if (radio->divmixer[rx->dmix_id] != NULL) {
-    if (radio->divmixer[rx->dmix_id]->calibrate_gain) {    
+    if (radio->divmixer[rx->dmix_id]->calibrate_gain) {
       radio->divmixer[rx->dmix_id]->rx_hidden->panadapter_width = rx->panadapter_width;
-      radio->divmixer[rx->dmix_id]->rx_hidden->panadapter_height = rx->panadapter_height;   
+      radio->divmixer[rx->dmix_id]->rx_hidden->panadapter_height = rx->panadapter_height;
       radio->divmixer[rx->dmix_id]->rx_hidden->pixels = rx->pixels;
       radio->divmixer[rx->dmix_id]->rx_hidden->fps = rx->fps;
       radio->divmixer[rx->dmix_id]->rx_hidden->display_average_time = rx->display_average_time;
-      receiver_init_analyzer(radio->divmixer[rx->dmix_id]->rx_hidden);    
+      receiver_init_analyzer(radio->divmixer[rx->dmix_id]->rx_hidden);
     }
-  }  
+  }
 
   if (rx->panadapter_surface) {
     cairo_surface_destroy (rx->panadapter_surface);
@@ -286,9 +289,9 @@ static gboolean first_time=TRUE;
 void update_rx_panadapter(RECEIVER *rx,gboolean running) {
   int i;
   int x1,x2;
-  
+
   int gain_cal_error = FALSE;
-  
+
   float *samples;
   float *samples_hidden_rx;
   cairo_text_extents_t extents;
@@ -301,8 +304,8 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
   samples=rx->pixel_samples;
   samples[display_width-1+offset]=-200;
   double dbm_per_line=(double)display_height/((double)rx->panadapter_high-(double)rx->panadapter_low);
-  
-  
+
+
   double attenuation=radio->adc[rx->adc].attenuation;
   // With diversity mixers, for calibration of gain between 2 RX, don't
   // want adjustment of panadapter with gain
@@ -310,10 +313,10 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
     if (radio->divmixer[rx->dmix_id]->calibrate_gain) {
       attenuation = 0;
       rx->panadapter_filled = FALSE;
-      
+
       if (radio->divmixer[rx->dmix_id]->rx_hidden->pixel_samples != NULL) {
         samples_hidden_rx = radio->divmixer[rx->dmix_id]->rx_hidden->pixel_samples;
-        samples_hidden_rx[display_width-1 + offset] = -200;        
+        samples_hidden_rx[display_width-1 + offset] = -200;
       }
       else {
         gain_cal_error = TRUE;
@@ -322,11 +325,11 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
 
     }
   }
-  
+
   if(radio->discovered->device==DEVICE_HERMES_LITE2) {
       attenuation = attenuation * -1;
   }
-  
+
 
   if(display_height<=1) return;
 
@@ -370,7 +373,7 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
     if(!running) {
       SetColour(cr, WARNING);
       cairo_set_font_size(cr, 18);
-      cairo_move_to(cr, display_width/2, display_height/2);  
+      cairo_move_to(cr, display_width/2, display_height/2);
       cairo_show_text(cr, "No data - receiver thread exited");
       cairo_destroy (cr);
       gtk_widget_queue_draw (rx->panadapter);
@@ -385,10 +388,10 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
                              (rx->panadapter_width / 2),
                              rx->panadapter_height + 300,
                              rx->panadapter_width/2);
-      
+
       cairo_pattern_add_color_stop_rgba(pat, 1, 0.1, 0.1, 0.1, 1);
-      cairo_pattern_add_color_stop_rgba(pat, 0, 0.25, 0.25, 0.25, 1);      
-      
+      cairo_pattern_add_color_stop_rgba(pat, 0, 0.25, 0.25, 0.25, 1);
+
       cairo_rectangle(cr, 0,0,rx->panadapter_width,rx->panadapter_height);
       cairo_set_source (cr, pat);
       cairo_fill(cr);
@@ -424,76 +427,112 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
     cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.75);
     double filter_left=((double)rx->pixels/2.0)-(double)rx->pan+(((double)rx->filter_low_a+rx->ctun_offset)/rx->hz_per_pixel);
     double filter_right=((double)rx->pixels/2.0)-(double)rx->pan+(((double)rx->filter_high_a+rx->ctun_offset)/rx->hz_per_pixel);
-    
-    
-    cairo_pattern_t *pat3 = cairo_pattern_create_linear(filter_left, 0, filter_left, (double)display_height);
-  
-    //cairo_pattern_add_color_stop_rgb(pat3, 0.01, 0.1, 0.1, 0.1);
-    cairo_pattern_add_color_stop_rgba(pat3, 0.1, 0.5, 0.5, 0.5, 0.75);
-    cairo_pattern_add_color_stop_rgb(pat3, 0.7, 0.1, 0.1, 0.1);
-  
-    cairo_rectangle(cr, filter_left, 0.0, filter_right-filter_left, (double)display_height);
-    
-    cairo_set_source(cr, pat3);
-    
+    cairo_rectangle(cr, filter_left, 10.0, filter_right-filter_left, (double)display_height);
     cairo_fill(cr);
-    
-    // Show VFO B (tx) for split mode
-    
-    double cw_offset = 0;
-    if(rx->mode_a==CWL || rx->mode_a==CWU) {  
-      if(rx->mode_a==CWU) {
-        cw_offset=-radio->cw_keyer_sidetone_frequency;
-      } else {
-        cw_offset=+radio->cw_keyer_sidetone_frequency;
-      }  
+
+    double cursor;
+    // draw cursor for cw mode
+    if(rx->mode_a==CWU || rx->mode_a==CWL) {
+      SetColour(cr, TEXT_B);
+      cursor=filter_left+((filter_right-filter_left)/2.0);
+      cairo_move_to(cr,cursor,10.0);
+      cairo_line_to(cr,cursor,(double)display_height-20);
+      cairo_stroke(cr);
+    } else {
+      SetColour(cr, TEXT_A);
+      cursor=(double)(rx->pixels/2.0)-(double)rx->pan+(rx->ctun_offset/rx->hz_per_pixel);
+      cairo_move_to(cr,cursor,10.0);
+      cairo_line_to(cr,cursor,(double)display_height-20.0);
+      cairo_stroke(cr);
     }
-    // VFO B/sub rx filter        
-    if(rx->subrx!=NULL) { 
-      i=(int)(((double)rx->frequency_b-(double)min_display)/rx->hz_per_pixel);         
-      filter_left = i + (rx->filter_low_a / rx->hz_per_pixel);
-      filter_right = i + (rx->filter_high_a / rx->hz_per_pixel);
-      cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.75);    
-      cairo_rectangle(cr, filter_left, 0.0, filter_right-filter_left, (double)display_height);
-      cairo_fill(cr);
+
+    // draw the frequency
+    char temp[32];
+    long long af=rx->ctun?rx->ctun_frequency:rx->frequency_a;
+    sprintf(temp,"%5lld.%03lld.%03lld",af/(long long)1000000,(af%(long long)1000000)/(long long)1000,af%(long long)1000);
+    cairo_set_font_size(cr, 12);
+    cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
+    cairo_text_extents(cr, temp, &extents);
+    cairo_move_to(cr, (double)cursor-(extents.width/2.0), 10);
+    cairo_show_text(cr, temp);
+
+
+    // Show VFO B (tx) for split mode or if subrx enabled
+    if(rx->split==SPLIT_ON || rx->subrx_enable) {
+      double diff = (double)(rx->frequency_b - rx->frequency_a)/rx->hz_per_pixel;
+      if(rx->mode_a==CWU || rx->mode_a==CWL) {
+        SetColour(cr, WARNING);
+        double cw_frequency=filter_left+((filter_right-filter_left)/2.0);
+	cursor=cw_frequency+diff;
+        cairo_move_to(cr,cursor,20.0);
+        cairo_line_to(cr,cursor,(double)display_height-20);
+        cairo_stroke(cr);
+      } else if(rx->subrx_enable) {
+        // VFO B cursor
+        SetColour(cr, WARNING);
+	cursor=(double)(rx->pixels/2.0)-(double)rx->pan+diff;
+        cairo_move_to(cr,cursor,20.0);
+        cairo_line_to(cr,cursor,(double)display_height-20);
+        cairo_stroke(cr);
+
+        cairo_set_source_rgba (cr, 0.7, 0.7, 0.7, 0.75);
+#ifdef USE_VFO_B_MODE_AND_FILTER
+        double filter_left=((double)rx->pixels/2.0)-(double)rx->pan+(((double)rx->filter_low_b)/rx->hz_per_pixel)+diff;
+        double filter_right=((double)rx->pixels/2.0)-(double)rx->pan+(((double)rx->filter_high_b)/rx->hz_per_pixel)+diff;
+#else
+        double filter_left=((double)rx->pixels/2.0)-(double)rx->pan+(((double)rx->filter_low_a)/rx->hz_per_pixel)+diff;
+        double filter_right=((double)rx->pixels/2.0)-(double)rx->pan+(((double)rx->filter_high_a)/rx->hz_per_pixel)+diff;
+#endif
+        cairo_rectangle(cr, filter_left, 20.0, filter_right-filter_left, (double)display_height-20);
+        cairo_fill(cr);
+      }
+
+      // draw the frequency
+      char temp[32];
+      sprintf(temp,"%5lld.%03lld.%03lld",rx->frequency_b/(long long)1000000,(rx->frequency_b%(long long)1000000)/(long long)1000,rx->frequency_b%(long long)1000);
+      cairo_set_font_size(cr, 12);
+      cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
+      cairo_text_extents(cr, temp, &extents);
+      cairo_move_to(cr, (double)cursor-(extents.width/2.0), 20);
+      cairo_show_text(cr, temp);
     }
-    
+
     cairo_set_line_width (cr, LINE_WIDTH);
     // plot the levels
-    
+
     cairo_set_source_rgb (cr, 0.1, 0.1, 0.1);
     //cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
     cairo_rectangle(cr,0,0,40,display_height);
-    cairo_fill(cr);    
-    
+    cairo_fill(cr);
+
     for(i=rx->panadapter_high;i>=rx->panadapter_low;i--) {
       SetColour(cr, DARK_LINES);
       int mod=abs(i)%20;
       if(mod==0) {
         double y = (double)(rx->panadapter_high-i)*dbm_per_line;
         cairo_move_to(cr,0.0,y);
-        
+
         static const double dashed2[] = {2.0, 2.0};
-        static int len2  = sizeof(dashed2) / sizeof(dashed2[0]);        
+        static int len2  = sizeof(dashed2) / sizeof(dashed2[0]);
         cairo_set_dash(cr, dashed2, len2, 0);
 
         cairo_line_to(cr,(double)display_width,y);
         if(rx->panadapter_gradient) SetColour(cr, TEXT_B);
         sprintf(temp," %d",i);
-        cairo_move_to(cr, 5, y-1);  
+        cairo_move_to(cr, 5, y-1);
         cairo_show_text(cr, temp);
       }
     }
-    SetColour(cr, DARK_LINES);      
+    SetColour(cr, DARK_LINES);
     cairo_stroke(cr);
 
 
 
     // plot frequency markers
-    
+
     cairo_set_source_rgb (cr, 0.1, 0.1, 0.1);
     cairo_rectangle(cr,0, (rx->panadapter_height-20), display_width, (rx->panadapter_height));
-    cairo_fill(cr);        
+    cairo_fill(cr);
 
     // if zoom > 1 - show the pan position
     if(rx->zoom!=1) {
@@ -501,7 +540,7 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
       int pan_width=(int)((double)rx->panadapter_width/(double)rx->zoom);
       cairo_set_source_rgb (cr, 0.7, 0.7, 0.7);
       cairo_rectangle(cr,pan_x, (rx->panadapter_height-4), pan_width, (rx->panadapter_height));
-      cairo_fill(cr);        
+      cairo_fill(cr);
     }
 
     long long f1;
@@ -537,7 +576,7 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
     }
     else if (rx->mode_a==CWL) {
       f1 += radio->cw_keyer_sidetone_frequency;
-    }    
+    }
     f2=(f1/divisor2)*divisor2;
 
     int x=0;
@@ -567,7 +606,7 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
       }
       f2=f2+divisor2;
     } while(x<display_width);
-    
+
 
 
     if(rx->band_a!=band60) {
@@ -592,7 +631,7 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
         cairo_set_line_width(cr, LINE_WIDTH);
       }
     }
-    
+
     cairo_set_dash(cr, 0, 0, 0);
     // agc
     if(rx->agc!=AGC_OFF) {
@@ -602,14 +641,14 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
 
       GetRXAAGCHangLevel(rx->channel, &hang);
       GetRXAAGCThresh(rx->channel, &thresh, 4096.0, (double)rx->sample_rate);
-    
+
       if(rx->panadapter_agc_line) {
-        double knee_y=thresh+attenuation+radio->panadapter_calibration;      
+        double knee_y=thresh+attenuation+radio->panadapter_calibration;
         knee_y = floor((rx->panadapter_high - knee_y)*dbm_per_line);
-  
-        double hang_y=hang+attenuation+radio->panadapter_calibration;    
+
+        double hang_y=hang+attenuation+radio->panadapter_calibration;
         hang_y = floor((rx->panadapter_high - hang_y)*dbm_per_line);
-  
+
         if(rx->agc!=AGC_MEDIUM && rx->agc!=AGC_FAST) {
           SetColour(cr, TEXT_A);
           cairo_move_to(cr,x,hang_y-8.0);
@@ -621,7 +660,7 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
           cairo_move_to(cr,x+8.0,hang_y);
           cairo_show_text(cr, "-H");
         }
-  
+
         SetColour(cr, TEXT_C);
         cairo_move_to(cr,x,knee_y-8.0);
         cairo_rectangle(cr, x, knee_y-8.0,8.0,8.0);
@@ -630,34 +669,34 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
         cairo_line_to(cr,(double)display_width-x,knee_y);
         cairo_stroke(cr);
         cairo_move_to(cr,x+8.0,knee_y);
-        cairo_show_text(cr, "-G");      
+        cairo_show_text(cr, "-G");
       }
     }
 
 
     // cursor
-    SetColour(cr, TEXT_B);  
+    SetColour(cr, TEXT_B);
     cairo_move_to(cr,(double)(rx->pixels/2.0)-(double)rx->pan+(rx->ctun_offset/rx->hz_per_pixel) - (cw_offset/rx->hz_per_pixel),0.0);
     cairo_line_to(cr,(double)(rx->pixels/2.0)-(double)rx->pan+(rx->ctun_offset/rx->hz_per_pixel) - (cw_offset/rx->hz_per_pixel),(double)display_height-20);
-    cairo_stroke(cr);    
-    
-    // Frequency marker vfo b    
-    if(rx->subrx!=NULL) {   
+    cairo_stroke(cr);
+
+    // Frequency marker vfo b
+    if(rx->subrx!=NULL) {
       i=(int)(((double)rx->frequency_b-(double)min_display)/rx->hz_per_pixel);
       i -= cw_offset / rx->hz_per_pixel;
-      SetColour(cr, TEXT_C);        
+      SetColour(cr, TEXT_C);
       cairo_move_to(cr,(double)i,0.0);
       cairo_line_to(cr,(double)i,(double)display_height-20);
-      cairo_stroke(cr);     
+      cairo_stroke(cr);
     }
-    
+
     // signal
-    
-    
+
+
     double s2;
-    
+
     samples[display_width-1+offset]=-200;
-    
+
     cairo_move_to(cr, 0.0, display_height-20);
 
     for(i=1;i<display_width;i++) {
@@ -668,9 +707,9 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
       }
       cairo_line_to(cr, (double)i, s2);
     }
-  
-    
-      
+
+
+
     if(rx->panadapter_single_color == 0) {
         cairo_pattern_t *gradient;
         if(rx->panadapter_gradient) {
@@ -697,7 +736,7 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
         if(rx->panadapter_filled) {
             cairo_close_path (cr);
             /*
-              cairo_pattern_t *pat=cairo_pattern_create_linear(0.624,	0.427,	0.690,(rx->panadapter_height-20));     
+              cairo_pattern_t *pat=cairo_pattern_create_linear(0.624,	0.427,	0.690,(rx->panadapter_height-20));
               cairo_pattern_add_color_stop_rgba(pat,0.0,0.804,	0.635,	0.859,0.5);
               cairo_pattern_add_color_stop_rgba(pat,1.0,0.804,	0.635,	0.859,0.5);
               cairo_set_source (cr, pat);
@@ -710,13 +749,13 @@ void update_rx_panadapter(RECEIVER *rx,gboolean running) {
         if(rx->panadapter_gradient) {
             cairo_pattern_destroy(gradient);
         }
-        
+
    }
     else {
       if(rx->panadapter_filled) {
         cairo_close_path (cr);
-        cairo_pattern_t *pat=cairo_pattern_create_linear(0.624,	0.427,	0.690,(rx->panadapter_height-20));  
-        
+        cairo_pattern_t *pat=cairo_pattern_create_linear(0.624,	0.427,	0.690,(rx->panadapter_height-20));
+
         switch(rx->panadapter_single_color) {
           case  2: //red
             cairo_pattern_add_color_stop_rgb(pat,0.0, 0.769, 0.117,0.227);

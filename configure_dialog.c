@@ -64,7 +64,9 @@ static gboolean delete_event(GtkWidget *widget, GdkEvent *event, gpointer data) 
   int i;
 
   save_xvtr();
+#ifdef MIDI
   configure_midi_device(false);
+#endif
   radio->dialog=NULL;
   for(i=0;i<radio->discovered->supported_receivers;i++) {
     if(radio->receiver[i]!=NULL) {
@@ -92,11 +94,11 @@ static gboolean switch_page_event(GtkNotebook *notebook,GtkWidget *page,guint pa
   }
   else if(strncmp("DMIX",text,4)==0) {
     update_transmitter_dialog(radio->transmitter);
-  }  
+  }
   else if(strncmp("OC",text,2)==0) {
     update_oc_dialog(radio);
-  }  
-  
+  }
+
   return TRUE;
 }
 

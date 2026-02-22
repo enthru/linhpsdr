@@ -255,7 +255,9 @@ typedef struct _receiver {
   gboolean subrx_enable;
   void *subrx;
 
-  int resample_step;
+  void *resampler;
+  gdouble *resampled_buffer;
+  gint resampled_buffer_size;
 
   void *resampler;
   gdouble *resampled_buffer;

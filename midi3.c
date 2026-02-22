@@ -1,6 +1,6 @@
 /*
  * Layer-3 of MIDI support
- * 
+ *
  * (C) Christoph van Wullen, DL1YCF
  *
  *
@@ -79,7 +79,7 @@ static int midi_action(void *data) {
 	      case MIDI_KNOB:
 		rx->volume = 0.01*val;
 		break;
-	      case MIDI_WHEEL:	
+	      case MIDI_WHEEL:
 		dnew=rx->volume += 0.01*val;
 		if (dnew < 0.0) dnew=0.0; if (dnew > 1.0) dnew=1.0;
 		rx->volume = dnew;
@@ -508,7 +508,7 @@ static int midi_action(void *data) {
 	case CWRIGHT: // only key
 //#ifdef LOCALCW
 	    if (type == MIDI_KEY) {
-		//new=(action == CWL);
+		new=(action == CWL);
 		//keyer_event(new,val);
 	    }
 //#endif
@@ -594,7 +594,7 @@ static int midi_action(void *data) {
                 break;
               case MIDI_WHEEL:
 		if (action == DIV_PHASE) {
-		  dnew = val*0.5; 
+		  dnew = val*0.5;
 		} else if (action == DIV_COARSEPHASE) {
 		  dnew = val*2.5;
 		} else if (action == DIV_FINEPHASE) {
@@ -723,7 +723,7 @@ static int midi_action(void *data) {
 	        new = !radio->mox;
 		set_mox(radio,new);
 	    }
-	    break;    
+	    break;
 /*
         /////////////////////////////////////////////////////////// "MUTE"
         case MIDI_MUTE:
@@ -1011,20 +1011,20 @@ static int midi_action(void *data) {
 		update_vfo(rx);
 		gtk_window_present(GTK_WINDOW(radio->receiver[midi_rx]->window));
 	    }
-	    break;    
+	    break;
 	/////////////////////////////////////////////////////////// "SWAPVFO"
 	case SWAP_VFO:	// only key supported
 	    if (type == MIDI_KEY) {
 		vfo_aswapb(rx);
 	    }
-	    break;    
+	    break;
 	/////////////////////////////////////////////////////////// "TUNE"
 	case MIDI_TUNE: // only key supported
 	    if (type == MIDI_KEY && radio->can_transmit) {
 	        new = !radio->tune;
 		set_tune(radio,new);
 	    }
-	    break;    
+	    break;
 	/////////////////////////////////////////////////////////// "VFOA"
 	/////////////////////////////////////////////////////////// "VFOB"
 	case VFOA: // only wheel supported
@@ -1227,5 +1227,3 @@ void DoTheMidi(enum MIDIaction action, enum MIDItype type, int val) {
           break;
     }
 }
-
-

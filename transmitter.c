@@ -31,6 +31,7 @@
 #include "alex.h"
 #include "discovered.h"
 #include "bpsk.h"
+#include "band.h"
 #include "mode.h"
 #include "filter.h"
 #include "receiver.h"
@@ -493,7 +494,7 @@ const int protocol1_tx_scheduler[20][26] = {
 {6, 12, 17, 23, 29, 34, 40, 45, 51, 57, 62, -1, -1, -1, -1, -1, -1, -1 , -1, -1, -1, -1, -1, -1, -1, -1}, // 11 frames per 63
 {12, 24, 34, 46, 58, 68, 80, 90, 102, 114, 124, -1, -1, -1, -1, -1, -1, -1 , -1, -1, -1, -1, -1, -1, -1, -1}, // 11 frames per 126
 {24, 48, 68, 92, 116, 136, 160, 180, 204, 228, 248, -1, -1, -1, -1, -1, -1, -1 , -1, -1, -1, -1, -1, -1, -1, -1},  // 11 frames per 252
-{48, 96, 136, 184, 232, 272, 320, 360, 408, 456, 496, -1, -1, -1, -1, -1, -1, -1 , -1, -1, -1, -1, -1, -1, -1, -1}};  // 11 frames per 504   
+{48, 96, 136, 184, 232, 272, 320, 360, 408, 456, 496, -1, -1, -1, -1, -1, -1, -1 , -1, -1, -1, -1, -1, -1, -1, -1}};  // 11 frames per 504
 
 void transmitter_save_state(TRANSMITTER *tx) {
   char name[80];
@@ -843,14 +844,14 @@ static gboolean update_timer_cb(void *data) {
         if (radio->filter_board == HL2_MRF101) {
           // HL2-MFR101 filter board
           constant1 = 3.3;
-          constant2 = 0.09;  
-          fwd_cal_offset = 6;     
+          constant2 = 0.09;
+          fwd_cal_offset = 6;
         }
         else {
           // N2ADR hl2 filter board
           constant1=3.3;
-          constant2=1.4;  
-          fwd_cal_offset=6;      
+          constant2=1.4;
+          fwd_cal_offset=6;
         }
         break;
     }
@@ -859,14 +860,14 @@ static gboolean update_timer_cb(void *data) {
     if(fwd_power==0) {
       fwd_power=ex_power;
     }
-    
+
     fwd_power=fwd_power-fwd_cal_offset;
     v1=((double)fwd_power/4095.0)*constant1;
-    tx->fwd=(v1*v1)/constant2;    
-    
+    tx->fwd=(v1*v1)/constant2;
+
     // Peak detection ring buffer
     tx->fwd_peak = get_peak(tx->fwd_peak_buf, tx->fwd);
-        
+
     if(radio->discovered->device==DEVICE_HERMES_LITE2) {
       tx->exciter=0.0;
     } else {
@@ -879,11 +880,11 @@ static gboolean update_timer_cb(void *data) {
     if(fwd_power!=0) {
       v1=((double)rev_power/4095.0)*constant1;
       tx->rev=(v1*v1)/constant2;
-    }  
+    }
   }
   else {
     // Peak detection ring buffer
-    tx->fwd_peak = get_peak(tx->fwd_peak_buf, 0);    
+    tx->fwd_peak = get_peak(tx->fwd_peak_buf, 0);
   }
 
   return TRUE;
@@ -1000,7 +1001,7 @@ void transmitter_set_ps_sample_rate(TRANSMITTER *tx,int rate) {
 // https://github.com/Tom-McDermott/gr-hpsdr/blob/master/lib/HermesProxy.cc
 int send_tx_packet_query(TRANSMITTER *tx) {
   tx->packet_counter++;
-  
+
   switch (radio->receivers) {
     case 1: {
       // one Tx frame for each Rx frame
@@ -1010,8 +1011,8 @@ int send_tx_packet_query(TRANSMITTER *tx) {
 		    if((tx->packet_counter & 0x1) == 0) return 1;
         break;
       }
-	
-      // one Tx frame for each four Tx frames  
+
+      // one Tx frame for each four Tx frames
 		  if(radio->sample_rate == 192000) {
 		    if((tx->packet_counter & 0x3) == 0) return 1;
         break;
@@ -1021,23 +1022,23 @@ int send_tx_packet_query(TRANSMITTER *tx) {
 		  if(radio->sample_rate == 384000) {
 		    if((tx->packet_counter & 0x7) == 0) return 1;
         break;
-      }	
+      }
     }
-    
+
     case 2: {
       // one Tx frame for each 1.75 Rx frame
       if(radio->sample_rate == 48000)	{
         if(((tx->packet_counter % 0x7) & 0x01) == 0) return 1;
         break;
       }
-        
+
 	    // one Tx frame for each 3.5 Rx frames
 		  if(radio->sample_rate == 96000)	{
 		    if(((tx->packet_counter % 0x7) & 0x03) == 0) return 1;
         break;
       }
-	
-      // one Tx frame for each four Tx frames  
+
+      // one Tx frame for each four Tx frames
 		  if(radio->sample_rate == 192000) {
 		    if((tx->packet_counter % 0x7) == 0) return 1;
         break;
@@ -1047,9 +1048,9 @@ int send_tx_packet_query(TRANSMITTER *tx) {
 		  if(radio->sample_rate == 384000) {
 		    if((tx->packet_counter % 14) == 0) return 1;
         break;
-      }	
+      }
     }
-    
+
     default: {
       int FrameIndex;
 		  int RxNumIndex = radio->receivers-3;	  //   3,  4,  5,  6,  7  -->  0, 1, 2, 3, 4
@@ -1064,30 +1065,30 @@ int send_tx_packet_query(TRANSMITTER *tx) {
 		  if(radio->sample_rate == 48000) FrameIndex = tx->packet_counter % 63;	// FrameIndex is 0..62
 	  	if(radio->sample_rate == 96000) FrameIndex = tx->packet_counter % 126;	// FrameIndex is 0..125
 	  	if(radio->sample_rate == 192000) FrameIndex = tx->packet_counter % 252;	// FrameIndex is 0..251
-	  	if(radio->sample_rate == 384000) FrameIndex = tx->packet_counter % 504;	// FrameIndex is 0..503      
-      
+	  	if(radio->sample_rate == 384000) FrameIndex = tx->packet_counter % 504;	// FrameIndex is 0..503
+
       for (int i = 0; i < 26; i++) {
-        if (FrameIndex == protocol1_tx_scheduler[selector][i]) return 1; 
+        if (FrameIndex == protocol1_tx_scheduler[selector][i]) return 1;
       }
       break;
-    }   
+    }
   }
   return 0;
 }
 
 int transmitter_get_mode(TRANSMITTER *tx) {
-  gint tx_mode = USB;    
+  gint tx_mode = USB;
   RECEIVER *tx_receiver = tx->rx;
   if(tx_receiver!=NULL) {
-#ifdef USE_VFO_B_MODE_AND_FILTER    
+#ifdef USE_VFO_B_MODE_AND_FILTER
     if(tx_receiver->split) {
       tx_mode = tx_receiver->mode_b;
     } else {
-#endif      
+#endif
       tx_mode = tx_receiver->mode_a;
-#ifdef USE_VFO_B_MODE_AND_FILTER      
+#ifdef USE_VFO_B_MODE_AND_FILTER
     }
-#endif    
+#endif
   }
   return tx_mode;
 }
@@ -1119,15 +1120,15 @@ void transmitter_cw_sample_keystate(TRANSMITTER *tx) {
   // This *should* be a steady sample of key state every (1/48 * 126) uS.
   // However, depending on number rx, some gaps between calls to this
   // function have been seen to be 20-30 ms depending on CPU.
-  g_mutex_lock(&cwdaemon_mutex); 
+  g_mutex_lock(&cwdaemon_mutex);
   gboolean key_state_now = keytx;
-  g_mutex_unlock(&cwdaemon_mutex);   
-  
+  g_mutex_unlock(&cwdaemon_mutex);
 
-  // key state now is stored and put in a ring buffer. 
+
+  // key state now is stored and put in a ring buffer.
   // This works under the assumption this function is called every 2.65 ms
   // (126 p1 samples), we store the sample number at which the key state changed.
-  // However, sometimes we may have missed the heartbeat to call this function, so 
+  // However, sometimes we may have missed the heartbeat to call this function, so
   // a ring buffer is used to "catch up".
   // To avoid needing 2 ring buffers (time, key state), sample number is made negative
   // if the key state is OFF. We apply this adjustment to key_up_down_modified now.
@@ -1137,39 +1138,39 @@ void transmitter_cw_sample_keystate(TRANSMITTER *tx) {
     key_up_down_modified = 1;
   }
   else {
-    key_up_down_modified = -1;      
+    key_up_down_modified = -1;
   }
-  
+
   // Has key changed state since last function call?
   if (tx->last_key_state != key_state_now) {
     // Either start the hang time timer (key changed to OFF)
     // or reset the hang time timer (key change to ON)
     set_cwvox(radio, key_state_now);
-    
+
     // Time in ms since the change of key state
     // registered by cwdaemon
     double this_time = read_time_now();
     double cwd_delay = 1E3 * (this_time - cwd_changed_at);
-    
-    // We send 126 IQ samples to the protocol 1 radio, 
+
+    // We send 126 IQ samples to the protocol 1 radio,
     num_cw_samples = (long)(cwd_delay / (1.0 / 48.0));
-    
+
     // Save key state for next time we call this function
     tx->last_key_state = key_state_now;
-    
-    // This checks if it has been longer than 2.65 ms since the last 
+
+    // This checks if it has been longer than 2.65 ms since the last
     // call to this function
     if (num_cw_samples > tx->p1_packet_size){
       // How many "heartbeats" of this function call were missed?
       int num_packets_missed = num_cw_samples / tx->p1_packet_size;
-      
-      for (int i = 0; i < (num_packets_missed - 1); i++) {     
+
+      for (int i = 0; i < (num_packets_missed - 1); i++) {
         // Add the full packets that were missed to the ring buffer
         queue_put(tx->cw_iq_delay_buf, tx->p1_packet_size);
         num_cw_samples -= tx->p1_packet_size;
       }
       // Finally last packet (where key state change occured less than 2.65 ms ago)
-      queue_put(tx->cw_iq_delay_buf, (key_up_down_modified * tx->p1_packet_size));        
+      queue_put(tx->cw_iq_delay_buf, (key_up_down_modified * tx->p1_packet_size));
     }
     else {
       // State change occured in last 2.65 ms
@@ -1179,50 +1180,50 @@ void transmitter_cw_sample_keystate(TRANSMITTER *tx) {
   }
   else {
     // Key state hasn't changed
-    if (key_state_now) {      
-      queue_put(tx->cw_iq_delay_buf, key_up_down_modified - 1);           
-    } 
+    if (key_state_now) {
+      queue_put(tx->cw_iq_delay_buf, key_up_down_modified - 1);
+    }
     else {
-      queue_put(tx->cw_iq_delay_buf, key_up_down_modified);         
-    }      
+      queue_put(tx->cw_iq_delay_buf, key_up_down_modified);
+    }
   }
 }
 #endif
 
 
-// Protocol 1 receive thread calls this, to send 126 iq samples in a 
+// Protocol 1 receive thread calls this, to send 126 iq samples in a
 // tx packet
 void full_tx_buffer(TRANSMITTER *tx, gboolean force_send) {
   if (!isTransmitting(radio) && radio->discovered->device!=DEVICE_HERMES_LITE2) return;
   if ((isTransmitting(radio)) && (radio->classE)) return;
-  
+
   // Work out if we are going to send a tx packet or return
-  
+
   if (force_send) {
     g_print("Force %d\n", radio->hl2->overflow);
   }
   else {
     if (!send_tx_packet_query(tx)) return;
   }
-  
-  
+
+
   #ifdef CWDAEMON
   // PC generated cw waveform in the IQ packet sent the protocol 1 radio
-  gint tx_mode = transmitter_get_mode(tx);    
-  
+  gint tx_mode = transmitter_get_mode(tx);
+
   if (((radio->cwdaemon) && (tx_mode==CWL || tx_mode==CWU)) && (radio->cw_generation_mode == CWGEN_PC)) {
     transmitter_cw_sample_keystate(tx);
-  }  
+  }
 
   // Find out the key state (and implied time of key state change)
-  // after is it run through the delay line/ringbuffer  
-  bool key_state_delayed = FALSE;  
-  long this_sample_cw_idx = -126;      
+  // after is it run through the delay line/ringbuffer
+  bool key_state_delayed = FALSE;
+  long this_sample_cw_idx = -126;
 
-  if ((radio->cwdaemon) && (tx_mode==CWL || tx_mode==CWU)) {    
+  if ((radio->cwdaemon) && (tx_mode==CWL || tx_mode==CWU)) {
     int rv = queue_get(tx->cw_iq_delay_buf, &this_sample_cw_idx);
     if (rv != 0) g_print("cw waveform queue error = %d\n", rv);
-    
+
     if (this_sample_cw_idx < 0) {
       key_state_delayed = FALSE;
       // We have stored the sample as a negative number to allow us to know
@@ -1230,38 +1231,38 @@ void full_tx_buffer(TRANSMITTER *tx, gboolean force_send) {
       // further on in this function.
       // If we want the whole packet to be 0, we keep the -ve number
       if (this_sample_cw_idx != -(tx->p1_packet_size)) {
-        this_sample_cw_idx = (this_sample_cw_idx * -1);    
+        this_sample_cw_idx = (this_sample_cw_idx * -1);
       }
       // Check if key has been off for longer than hang time
-      if ((radio->mox) && (key_state_delayed == FALSE)) update_cwvox(radio);         
+      if ((radio->mox) && (key_state_delayed == FALSE)) update_cwvox(radio);
     }
     else {
       key_state_delayed = TRUE;
     }
   }
   #endif
-  
+
   int rv = 0;
   int buf_underflow = 0;
-  
-  for (int j = 0; j < tx->p1_packet_size; j++) {  
+
+  for (int j = 0; j < tx->p1_packet_size; j++) {
     long isample = 0;
-    long qsample = 0;           
-    
-    
-  
+    long qsample = 0;
+
+
+
     g_mutex_lock((&tx->queue_mutex));
     rv = queue_get(tx->p1_ringbuf, &isample);
     if (rv < 0) buf_underflow++;
-    rv = queue_get(tx->p1_ringbuf, &qsample);   
-    if (rv < 0) buf_underflow++;    
+    rv = queue_get(tx->p1_ringbuf, &qsample);
+    if (rv < 0) buf_underflow++;
     g_mutex_unlock((&tx->queue_mutex));
-    
+
     #ifdef CWDAEMON
     if (((radio->cwdaemon) && (tx_mode==CWL || tx_mode==CWU)) && (radio->cw_generation_mode == CWGEN_PC)) {
       isample = 0;
       // Send the buffered (delayed) cw waveform.
-      if(key_state_delayed) { 
+      if(key_state_delayed) {
         qsample = 0;
         if (j >= this_sample_cw_idx) {
           // Transition from 0 to 1 in this packet
@@ -1270,21 +1271,21 @@ void full_tx_buffer(TRANSMITTER *tx, gboolean force_send) {
         }
       }
       else {
-        if (j < this_sample_cw_idx) {  
-          // Transition from 1 to 0 in this packet (but might still be 
-          // on the rise of the waveform, so increment idx still     
+        if (j < this_sample_cw_idx) {
+          // Transition from 1 to 0 in this packet (but might still be
+          // on the rise of the waveform, so increment idx still
           qsample = floor(32767.0 * cw_waveform[tx->cw_waveform_idx] + 0.5);
-          if (tx->cw_waveform_idx < CW_WAVEFORM_SAMPLES - 1) tx->cw_waveform_idx++;      
+          if (tx->cw_waveform_idx < CW_WAVEFORM_SAMPLES - 1) tx->cw_waveform_idx++;
         }
         else {
           // Key off, either on the fall of the waveform (or already at 0)
           qsample = floor(32767.0 * cw_waveform[tx->cw_waveform_idx] + 0.5);
-          if (tx->cw_waveform_idx > 0) tx->cw_waveform_idx--;        
+          if (tx->cw_waveform_idx > 0) tx->cw_waveform_idx--;
         }
-      }      
+      }
     }
     #endif
-    
+
     protocol1_iq_samples(isample, qsample);
   }
 }
@@ -1300,9 +1301,9 @@ void full_tx_buffer_process(TRANSMITTER *tx) {
   double gain;
   int j;
   int error;
-  
-  // round half towards zero  
-  #define ROUNDHTZ(x) ((x)>=0.0?(long)floor((x)*gain+0.5):(long)ceil((x)*gain-0.5))  
+
+  // round half towards zero
+  #define ROUNDHTZ(x) ((x)>=0.0?(long)floor((x)*gain+0.5):(long)ceil((x)*gain-0.5))
 
   switch(radio->discovered->protocol) {
 #ifdef RADIOBERRY
@@ -1320,7 +1321,21 @@ void full_tx_buffer_process(TRANSMITTER *tx) {
       break;
 #endif
   }
-  
+
+  if(radio->penelope) {
+      float driveGain = pow(tx->drive, 2)/10000.0;
+      BAND *b = band_get_current_band();
+      double bandGain = b->pa_calibration;
+      float txGain = driveGain * bandGain/100.0f;
+      float micScaleOut = gain * txGain;
+
+      gain = micScaleOut;
+      if(radio->tune && !tx->tune_use_drive) {
+          gain=(gain*tx->tune_percent)/100.0;
+      }
+  }
+
+
   update_vox(radio);
   fexchange0(tx->channel, tx->mic_input_buffer, tx->iq_output_buffer, &error);
   if(error!=0) {
@@ -1328,21 +1343,22 @@ void full_tx_buffer_process(TRANSMITTER *tx) {
   }
 
   Spectrum0(1, tx->channel, 0, 0, tx->iq_output_buffer);
-  
+
   if ((radio->discovered->protocol == PROTOCOL_1) && (!radio->classE)) {
     // not going to send out packets now, put them in the ring buffer
-    // then every rx packet, we send a tx packet @48k  
+    // then every rx packet, we send a tx packet @48k
     for(int j = 0; j < tx->output_samples; j++) {
       long isample = ROUNDHTZ(tx->iq_output_buffer[j*2]);
-      long qsample = ROUNDHTZ(tx->iq_output_buffer[(j*2)+1]);  
-      g_mutex_lock((&tx->queue_mutex));    
+      long qsample = ROUNDHTZ(tx->iq_output_buffer[(j*2)+1]);
+
+      g_mutex_lock((&tx->queue_mutex));
       queue_put(tx->p1_ringbuf, isample);
-      queue_put(tx->p1_ringbuf, qsample);    
+      queue_put(tx->p1_ringbuf, qsample);
       g_mutex_unlock(&tx->queue_mutex);
     }
     return;
   }
-  
+
   if(isTransmitting(radio)) {
     if(radio->classE) {
       for(j=0;j<tx->output_samples;j++) {
@@ -1353,7 +1369,7 @@ void full_tx_buffer_process(TRANSMITTER *tx) {
       // input is TX IQ samples in inI,inQ
       // output phase/IQ/magnitude is written back to inI,inQ and
       //   outMI,outMQ contain the scaled and delayed input samples
-      
+
       xeerEXTF(0, tx->inI, tx->inQ, tx->inI, tx->inQ, tx->outMI, tx->outMQ, isTransmitting(radio), tx->output_samples);
 
     }
@@ -1400,7 +1416,7 @@ void full_tx_buffer_process(TRANSMITTER *tx) {
 void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
   int mode;
   double mic_sample_double;
- 
+
   if(tx->rx!=NULL) {
     mode= transmitter_get_mode(tx);
 
@@ -1412,7 +1428,7 @@ void add_mic_sample(TRANSMITTER *tx,float mic_sample) {
     tx->mic_input_buffer[tx->mic_samples*2]=mic_sample_double;
     tx->mic_input_buffer[(tx->mic_samples*2)+1]=0.0; //mic_sample_double;
     tx->mic_samples++;
-   
+
     if(tx->mic_samples==tx->buffer_size) {
       full_tx_buffer_process(tx);
       tx->mic_samples=0;
@@ -1437,14 +1453,14 @@ void add_ps_iq_samples(TRANSMITTER *tx, double i_sample_tx,double q_sample_tx, d
 
     if(isTransmitting(radio)) {
 //      g_print("pscc: size %i sample %i\n", tx->fbk_buffer_size, tx->rx_fbk_sample);
-      pscc(tx->channel, tx->rx_puresignal_txfbk->buffer_size, 
-           tx->rx_puresignal_txfbk->iq_input_buffer, 
+      pscc(tx->channel, tx->rx_puresignal_txfbk->buffer_size,
+           tx->rx_puresignal_txfbk->iq_input_buffer,
            tx->rx_puresignal_rxfbk->iq_input_buffer);
 //      if(transmitter->displaying && transmitter->feedback) {
 //        Spectrum0(1, rx_feedback->id, 0, 0, rx_feedback->iq_input_buffer);
 //      }
     }
-  
+
     tx->rx_puresignal_rxfbk->samples = 0;
     tx->rx_puresignal_txfbk->samples = 0;
   }
@@ -1630,7 +1646,7 @@ g_print("create_transmitter: channel=%d\n",channel);
   tx->fwd_peak = 0;
   tx->fwd = 0;
   tx->rev = 0;
-  
+
   tx->eer_amiq=1;
   tx->eer_pgain=0.5;
   tx->eer_mgain=0.5;
@@ -1730,7 +1746,7 @@ g_print("create_transmitter: channel=%d\n",channel);
   tx->rx_puresignal_txfbk = NULL;
   tx->rx_puresignal_rxfbk = NULL;
   #endif
-  
+
   tx->dialog=NULL;
 
   tx->xit_enabled=FALSE;
@@ -1829,15 +1845,15 @@ g_print("create_transmitter: channel=%d\n",channel);
   transmitter_set_mode(tx,mode);
 
   tx->tx_info = NULL;
-  tx->num_tx_info_meters = 0; 
-  
+  tx->num_tx_info_meters = 0;
+
   for (int i = 0; i <= NUM_TX_METERS; i++) {
     tx->tx_info_meter[i] = NULL;
   }
-  tx->tx_info_meter[NUM_TX_METERS+1] = NULL;  
-  
+  tx->tx_info_meter[NUM_TX_METERS+1] = NULL;
+
   tx->fwd_peak_buf = create_peak_detector(PEAK_DETECT_BUF_SIZE, 0);
-  
+
   create_visual(tx);
 
   XCreateAnalyzer(tx->channel, &rc, 262144, 1, 1, "");

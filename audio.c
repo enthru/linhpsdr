@@ -254,7 +254,7 @@ g_print("audio_open_output: SOUNDIO: %s\n",rx->audio_name);
         g_mutex_unlock(&rx->local_audio_mutex);
         return -1;
       }
-  
+
       rx->output_device = soundio_get_output_device(soundio, rx->output_index);
       if(!rx->output_device) {
         g_print("audio_open_output: could not get output device: out of memory");
@@ -320,7 +320,7 @@ g_print("audio_open_output: PULSEAUDIO: %s\n",rx->audio_name);
 
         char stream_id[16];
         sprintf(stream_id,"RX-%d",rx->channel);
-    
+
         rx->playstream=pa_simple_new(NULL,               // Use the default server.
                         "linHPSDR",           // Our application's name.
                         PA_STREAM_PLAYBACK,
@@ -331,7 +331,7 @@ g_print("audio_open_output: PULSEAUDIO: %s\n",rx->audio_name);
                         NULL,               // Use default buffering attributes.
                         &err               // error code if returns NULL
                         );
-    
+
         if(rx->playstream!=NULL) {
           rx->local_audio_buffer_offset=0;
           rx->local_audio_buffer=g_new0(float,2*rx->local_audio_buffer_size);
@@ -350,8 +350,8 @@ g_print("audio_open_output: ALSA: %s\n",rx->audio_name);
       unsigned int rate = 48000;
       unsigned int channels=2;
       int soft_resample=1;
-      unsigned int latency=125000;      
-      
+      unsigned int latency=125000;
+
       if(rx->audio_name==NULL) {
         rx->local_audio=0;
         return -1;
@@ -366,13 +366,13 @@ g_print("audio_open_output: ALSA: %s\n",rx->audio_name);
         i++;
       }
       hw[i]='\0';
-      
+
     g_print("audio_open_output: hw=%s\n",hw);
 
       for(i=0;i<FORMATS;i++) {
         g_mutex_lock(&rx->local_audio_mutex);
         if ((err = snd_pcm_open (&rx->playback_handle, hw, SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK)) < 0) {
-          g_print("audio_open_output: cannot open audio device %s (%s)\n", 
+          g_print("audio_open_output: cannot open audio device %s (%s)\n",
                   hw,
                   snd_strerror (err));
           g_mutex_unlock(&rx->local_audio_mutex);
@@ -415,17 +415,17 @@ g_print("audio_open_output: ALSA: %s\n",rx->audio_name);
 
         default: return -1;
       }
-      
-      g_print("audio_open_output: rx=%d handle=%p buffer=%p size=%d\n",rx->channel,rx->playback_handle,rx->local_audio_buffer,rx->local_audio_buffer_size);      
 
-      g_mutex_unlock(&rx->local_audio_mutex);          
+      g_print("audio_open_output: rx=%d handle=%p buffer=%p size=%d\n",rx->channel,rx->playback_handle,rx->local_audio_buffer,rx->local_audio_buffer_size);
+
+      g_mutex_unlock(&rx->local_audio_mutex);
       break;
     }
 #endif
   }
   return result;
 }
-	
+
 int audio_open_input(RADIO *r) {
   int result=0;
   int err;
@@ -525,16 +525,16 @@ int audio_open_input(RADIO *r) {
       }
 
       g_mutex_lock(&r->local_microphone_mutex);
-      
-      
+
+
       pa_buffer_attr attr;
       attr.maxlength = (uint32_t) -1;
       attr.tlength = (uint32_t) -1;
       attr.prebuf = (uint32_t) -1;
       attr.minreq = (uint32_t) -1;
-      attr.fragsize = 512;    
-      
-      
+      attr.fragsize = 512;
+
+
       sample_spec.rate=48000;
       sample_spec.channels=1;
       sample_spec.format=PA_SAMPLE_FLOAT32NE;
@@ -576,21 +576,21 @@ int audio_open_input(RADIO *r) {
       unsigned int channels=1;
       int soft_resample=1;
       unsigned int latency=125000;
-      
+
       char hw[64];
       int i = 0;
-      
+
       if(r->microphone_name==NULL) {
         r->local_microphone=0;
         return -1;
       }
-        
+
       while(r->microphone_name[i]!=' ') {
         hw[i]=r->microphone_name[i];
         i++;
       }
-      hw[i]='\0';      
-      
+      hw[i]='\0';
+
       g_print("audio_open_input: hw=%s\n",hw);
 
       for(i=0;i<FORMATS;i++) {
@@ -622,6 +622,7 @@ g_print("audio_open_input: cannot find usable format\n");
 g_print("audio_open_input: format=%d\n",record_audio_format);
 
       switch(record_audio_format) {
+/*
         case SND_PCM_FORMAT_S16_LE:
 g_print("audio_open_input: mic_buffer: size=%d channels=%d sample=%ld bytes\n",r->local_microphone_buffer_size,channels,sizeof(gint16));
           r->local_microphone_buffer = g_new(float, r->local_microphone_buffer_size);
@@ -630,12 +631,13 @@ g_print("audio_open_input: mic_buffer: size=%d channels=%d sample=%ld bytes\n",r
 g_print("audio_open_input: mic_buffer: size=%d channels=%d sample=%ld bytes\n",r->local_microphone_buffer_size,channels,sizeof(gint32));
           r->local_microphone_buffer = g_new(float, r->local_microphone_buffer_size);
           break;
+*/
         case SND_PCM_FORMAT_FLOAT_LE:
 g_print("audio_open_input: mic_buffer: size=%d channels=%d sample=%ld bytes\n",r->local_microphone_buffer_size,channels,sizeof(gfloat));
           r->local_microphone_buffer=g_new(gfloat, r->local_microphone_buffer_size);
           break;
-          
-        default: return -1;          
+
+        default: return -1;
       }
 
       //r->local_microphone_buffer_offset=0;
@@ -650,11 +652,11 @@ g_print("audio_open_input: mic_buffer: size=%d channels=%d sample=%ld bytes\n",r
         g_free(r->local_microphone_buffer);
         r->local_microphone_buffer=NULL;
         running=FALSE;
-        result=-1;        
+        result=-1;
       }
       break;
   }
-#endif  
+#endif
   }
   return result;
 }
@@ -671,7 +673,7 @@ void audio_close_output(RECEIVER *rx) {
       if(rx->output_device!=NULL) {
         soundio_device_unref(rx->output_device);
         rx->output_device=NULL;
-      } 
+      }
       if(rx->ring_buffer!=NULL) {
         soundio_ring_buffer_destroy(rx->ring_buffer);
         rx->ring_buffer=NULL;
@@ -695,7 +697,7 @@ void audio_close_output(RECEIVER *rx) {
       g_mutex_unlock(&rx->local_audio_mutex);
       break;
     }
-    case USE_ALSA: {    
+    case USE_ALSA: {
       g_mutex_lock(&rx->local_audio_mutex);
       if(rx->playback_handle!=NULL) {
         snd_pcm_close (rx->playback_handle);
@@ -743,9 +745,9 @@ void audio_close_input(RADIO *r) {
 g_print("audio_close_input: wait for thread to complete\n");
         g_thread_join(mic_read_thread_id);
         mic_read_thread_id=NULL;
-      }      
+      }
       if(r->record_handle!=NULL) {
-g_print("audio_close_input: snd_pcm_close\n");        
+g_print("audio_close_input: snd_pcm_close\n");
         snd_pcm_close (r->record_handle);
         r->record_handle=NULL;
       }
@@ -753,8 +755,8 @@ g_print("audio_close_input: snd_pcm_close\n");
 g_print("audio_close_input: free mic buffer\n");
         g_free(r->local_microphone_buffer);
         r->local_microphone_buffer=NULL;
-      }      
-      
+      }
+
       g_free(r->local_microphone_buffer);
       r->local_microphone_buffer=NULL;
       g_mutex_unlock(&r->local_microphone_mutex);
@@ -794,8 +796,8 @@ int audio_write(RECEIVER *rx,float left_sample,float right_sample) {
   int result=0;
   int rc;
   int err;
-  float *float_buffer;  
-  
+  float *float_buffer;
+
   switch(radio->which_audio) {
     case USE_SOUNDIO: {
       g_mutex_lock(&rx->local_audio_mutex);
@@ -823,19 +825,19 @@ int audio_write(RECEIVER *rx,float left_sample,float right_sample) {
         rx->local_audio_buffer_offset=0;
         rx->local_audio_buffer=g_new0(float,2*rx->local_audio_buffer_size);
       }
-      
+
       float_buffer=(float *)rx->local_audio_buffer;
       float_buffer[rx->local_audio_buffer_offset*2]=left_sample;
       float_buffer[(rx->local_audio_buffer_offset*2)+1]=right_sample;
       //rx->local_audio_buffer[rx->local_audio_buffer_offset*2]=left_sample;
       //rx->local_audio_buffer[(rx->local_audio_buffer_offset*2)+1]=right_sample;
-      
+
       rx->local_audio_buffer_offset++;
       if(rx->local_audio_buffer_offset>=rx->local_audio_buffer_size) {
         rc=pa_simple_write(rx->playstream,
                            rx->local_audio_buffer,
                            rx->local_audio_buffer_size*sizeof(float)*2,
-                           &err); 
+                           &err);
         if(rc!=0) {
           fprintf(stderr,"audio_write failed err=%d\n",err);
         }
@@ -847,10 +849,10 @@ int audio_write(RECEIVER *rx,float left_sample,float right_sample) {
     case USE_ALSA: {
       snd_pcm_sframes_t delay;
       long trim;
-      
+
 
       gint32 *long_buffer;
-      gint16 *short_buffer;      
+      gint16 *short_buffer;
 
       g_mutex_lock(&rx->local_audio_mutex);
 
@@ -871,8 +873,8 @@ int audio_write(RECEIVER *rx,float left_sample,float right_sample) {
             float_buffer[rx->local_audio_buffer_offset*2]=left_sample;
             float_buffer[(rx->local_audio_buffer_offset*2)+1]=right_sample;
             break;
-            
-          default: return -1;            
+
+          default: return -1;
         }
         rx->local_audio_buffer_offset++;
 
@@ -911,7 +913,7 @@ g_print("audio delay=%ld trim=%ld audio_buffer_size=%d\n",delay,trim,rx->local_a
 
       g_mutex_unlock(&rx->local_audio_mutex);
       break;
-    }      
+    }
 #endif
   }
   return result;
@@ -961,7 +963,7 @@ static void *mic_read_thread(gpointer arg) {
           rc=pa_simple_read(r->microphone_stream,
       		r->local_microphone_buffer,
       		r->local_microphone_buffer_size*sizeof(float),
-      		&err); 
+      		&err);
           if(rc<0) {
             running=0;
             g_print("mic_read_thread: returned %d error=%d (%s)\n",rc,err,pa_strerror(err));
@@ -1004,7 +1006,7 @@ fprintf(stderr,"mic_read_thread: ALSA: mic_buffer_size=%d\n",radio->local_microp
                 //g_print("mic_read_thread: -EPIPE: snd_pcm_prepare\n");
                 if ((rc = snd_pcm_prepare (r->record_handle)) < 0) {
                     g_print("mic_read_thread: ALSA: cannot prepare audio interface for use %d (%s)\n", rc, snd_strerror (rc));
-                    //return rc;
+                    return NULL;
                 }
               } else {
                 fprintf (stderr, "mic_read_thread: ALSA: read from audio interface failed (%s)\n",
@@ -1018,7 +1020,7 @@ fprintf(stderr,"mic_read_thread: ALSA: mic_buffer_size=%d\n",radio->local_microp
         } else {
           // process the mic input
           switch(r->discovered->protocol) {
-            case PROTOCOL_1:        
+            case PROTOCOL_1:
               protocol1_process_local_mic(r);
               break;
             case PROTOCOL_2:
@@ -1057,7 +1059,7 @@ static void source_list_cb(pa_context *context,const pa_source_info *s,int eol,v
     input_devices[n_input_devices].description=g_new0(char,strlen(s->description)+1);
     memcpy(input_devices[n_input_devices].description,s->description, strlen(s->description));
     input_devices[n_input_devices].index=s->index;
-    
+
     n_input_devices++;
   }
 }
@@ -1181,7 +1183,7 @@ g_print("audio: create_audio: USE_SOUNDIO: %d %s\n",soundio_get_backend(soundio,
         }
       }
       break;
-  
+
 #ifndef __APPLE__
     case USE_PULSEAUDIO:
 g_print("audio: create_audio: USE_PULSEAUDIO\n");
@@ -1264,7 +1266,7 @@ g_print("output_device: %s\n",device_id);
           }
           snd_ctl_close(handle);
         }
-	
+
         // look for dmix
         void **hints, **n;
         char *name, *descr, *io;

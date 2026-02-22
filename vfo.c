@@ -267,7 +267,7 @@ void split_cb(GtkWidget *menu_item,gpointer data) {
   g_signal_handlers_block_by_func(choice->button,G_CALLBACK(split_b_cb),rx);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(choice->button),rx->split!=SPLIT_OFF);
   g_signal_handlers_unblock_by_func(choice->button,G_CALLBACK(split_b_cb),rx);
-
+  frequency_changed(rx);
   if(radio->transmitter && radio->transmitter->rx==rx) {
     switch(rx->split) {
       case SPLIT_OFF:
