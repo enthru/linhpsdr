@@ -1044,13 +1044,16 @@ void receiver_set_freetune(RECEIVER *rx, gboolean enable) {
     if(rx->ctun_frequency < rx->ctun_min) rx->ctun_frequency = rx->ctun_min;
     if(rx->ctun_frequency > rx->ctun_max) rx->ctun_frequency = rx->ctun_max;
     SetRXAShiftRun(rx->channel, 1);
-  } else {
+} else {
     if(!rx->ctun) {
+      rx->ctun_frequency = rx->frequency_a;
+      rx->ctun_offset = 0;
+      SetRXAShiftFreq(rx->channel, 0.0);
+      RXANBPSetShiftFrequency(rx->channel, 0.0);
       SetRXAShiftRun(rx->channel, 0);
     }
   }
 
-  /* Только если визуальная часть уже создана */
   if(rx->vfo != NULL) {
     frequency_changed(rx);
     update_frequency(rx);
